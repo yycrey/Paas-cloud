@@ -25,15 +25,16 @@ public class NotifyServiceImpl implements NotifyService {
 
     private static final String SEND_SUBJECT = "Rey验证码";
 
-    private static final String SEND_CONTENT = "您的验证码为：有效期为60秒，请勿发送给他人";
+    private static final String SEND_CONTENT = "验证码有效期为60秒，请勿发送给他人：";
 
     @Override
     public JsonData sendEmailCode(SendCodeEnum sendCodeEnum, String to) {
+
         //检查邮箱
         if(CheckUtil.isEmail(to)){
             //获取邮箱验证码
             String code = CommonUtil.generateRandomNumber(6);
-            mailService.sendSimpleMail(to,SEND_SUBJECT,String.format(SEND_CONTENT,code));
+            mailService.sendSimpleMail(to,SEND_SUBJECT,SEND_CONTENT+code);
             return JsonData.buildSuccess();
             //邮箱验证码
         }else if(CheckUtil.isPhone(to)){

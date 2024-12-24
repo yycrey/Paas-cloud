@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import paas.rey.enums.BizCodeEnum;
 import paas.rey.enums.SendCodeEnum;
 import paas.rey.service.NotifyService;
 import paas.rey.utils.CommonUtil;
@@ -89,7 +90,16 @@ public class NotifyController {
           */
          @ApiOperation("发送验证码到邮箱")
          @GetMapping("sendEmailCode")
-         public JsonData sendEmailCode(@RequestParam("to") String to, @RequestParam("captha") String captcha, HttpServletRequest request){
-            return notifyService.sendEmailCode(SendCodeEnum.REGISTER,to);
+         public JsonData sendEmailCode(@RequestParam(value = "to",required = true) String to, @RequestParam(value = "captha",required = true) String captcha, HttpServletRequest request){
+             //根据不同的ip地址获取不同的验证码
+             String code = getCaptchaKey(request);
+             String captchaCode = (String) redisTemplate.opsForValue().get(code);
+
+             if(captcha != null && captcha.equalsIgnoreCase(captchaCode)){
+                 redisTemplate.delete(code);
+                 return notifyService.sendEmailCode(SendCodeEnum.REGISTER,to);
+             }else {
+                 return JsonData.buildResult(BizCodeEnum.CODE_CAPTCHA);
+             }
          }
 }
