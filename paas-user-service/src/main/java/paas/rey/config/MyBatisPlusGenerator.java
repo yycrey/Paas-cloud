@@ -1,4 +1,4 @@
-package paas.rey.db;
+package paas.rey.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.annotation.IdType;

@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @Author yeyc
- * @Description 描述类的作用
+ * @Description 用户服务启动类
  * @Date 2024/12/23
  * @Param
  * @Exception
