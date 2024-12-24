@@ -103,4 +103,12 @@ public class CommonUtil {
         return sb.toString();
     }
 
+
+    /*
+    获取当前时间戳
+     */
+    public static long getCurrentTimestamp() {
+        return System.currentTimeMillis();
+    }
+
 }
