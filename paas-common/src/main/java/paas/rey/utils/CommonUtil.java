@@ -1,9 +1,14 @@
 package paas.rey.utils;
 
+import paas.rey.enums.BizCodeEnum;
+import paas.rey.exception.BizException;
+
 import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Random;
 
 /**
  * @Author yeyc
@@ -66,16 +71,36 @@ public class CommonUtil {
     public static String MD5(String data)  {
         try {
             java.security.MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] array = md.digest(data.getBytes("UTF-8"));
+            byte[] array = md.digest(data.getBytes(StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             for (byte item : array) {
-                sb.append(Integer.toHexString((item & 0xFF) | 0x100).substring(1, 3));
+                sb.append(Integer.toHexString((item & 0xFF) | 0x100), 1, 3);
             }
 
             return sb.toString().toUpperCase();
         } catch (Exception exception) {
         }
         return null;
-
     }
+
+    /**
+     * 生成一个随机码
+     * @param length 随机数长度
+     * @return 生成的随机整数
+     * @auther yeyc
+     */
+    public static String generateRandomNumber(int length) {
+        String sources = "0123456789";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        if(0 > length){
+            throw new BizException(BizCodeEnum.CODE_LEGTH_ERROR);
+        }else{
+            for(int i = 0; i<length; i++){
+                sb.append(sources.charAt(random.nextInt(9)));
+            }
+        }
+        return sb.toString();
+    }
+
 }

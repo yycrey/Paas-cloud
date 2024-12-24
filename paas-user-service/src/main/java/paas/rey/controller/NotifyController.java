@@ -6,9 +6,14 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import paas.rey.enums.SendCodeEnum;
+import paas.rey.service.NotifyService;
 import paas.rey.utils.CommonUtil;
+import paas.rey.utils.JsonData;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
@@ -35,6 +40,8 @@ public class NotifyController {
         private Producer captchaProducer;
         @Autowired
         private RedisTemplate redisTemplate;
+        @Autowired
+        private NotifyService notifyService;
 
         //图形验证码10分钟过期时间
         private static final int CAPTCHA_EXPIRE_TIME = 60 * 1000 * 10;
@@ -69,5 +76,20 @@ public class NotifyController {
                  log.info("userAgent{}"+userAgent);
                  log.info("skey{}"+skey);
                  return skey;
+         }
+
+         /**
+          * @Description: 发送验证码到邮箱
+          * 1.匹配图形验证码是否正常
+          * 2.发送验证码
+          * @Param:
+          * @Return:
+          * @Author: yeyc
+          * @Date: 2024/12/24
+          */
+         @ApiOperation("发送验证码到邮箱")
+         @GetMapping("sendEmailCode")
+         public JsonData sendEmailCode(@RequestParam("to") String to, @RequestParam("captha") String captcha, HttpServletRequest request){
+            return notifyService.sendEmailCode(SendCodeEnum.REGISTER,to);
          }
 }

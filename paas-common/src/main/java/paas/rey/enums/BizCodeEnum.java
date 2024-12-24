@@ -1,8 +1,6 @@
 package paas.rey.enums;
 
-import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @Author yeyc
@@ -12,6 +10,7 @@ import lombok.Setter;
  * @Exception
  **/
 
+@Getter
 public enum BizCodeEnum {
 
     /**
@@ -25,18 +24,19 @@ public enum BizCodeEnum {
     CODE_LIMITED(240002,"验证码发送过快"),
     CODE_ERROR(240003,"验证码错误"),
     CODE_CAPTCHA(240101,"图形验证码错误"),
-
     /**
      * 账号
      */
     ACCOUNT_REPEAT(250001,"账号已经存在"),
     ACCOUNT_UNREGISTER(250002,"账号不存在"),
-    ACCOUNT_PWD_ERROR(250003,"账号或者密码错误");
+    ACCOUNT_PWD_ERROR(250003,"账号或者密码错误"),
+    /*
+    随机数错误枚举类
+     */
+    CODE_LEGTH_ERROR(270001,"随机数长度不符合规范，理应在0~9之间");
 
-    @Getter
-    private  String message;
-    @Getter
-    private  int code;
+    private final String message;
+    private final int code;
 
     //有参构造函数私有化
     BizCodeEnum(int code, String message) {
