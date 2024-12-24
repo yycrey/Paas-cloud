@@ -1,4 +1,5 @@
 package paas.rey.controller;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -6,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RestController;
-import paas.rey.exception.BizException;
-import paas.rey.exception.CustomExceptionHandler;
 import paas.rey.model.AddressDO;
 import paas.rey.service.AddressService;
 import paas.rey.utils.JsonData;
@@ -36,11 +34,6 @@ public class AddressController {
     @GetMapping("findById/{address_id}")
     public Object findById(@ApiParam(value = "地址ID",required = true) @PathVariable("address_id") long addressId){
         AddressDO addressDO = addressService.findById(addressId);
-
-        int i = 1/0;
-//        if(addressId ==1 ){
-//            throw  new BizException(-1,"参数异常");
-//        }
         return JsonData.buildSuccess(addressDO);
     }
 }

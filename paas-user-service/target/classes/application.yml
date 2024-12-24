@@ -4,7 +4,15 @@ server:
 spring:
   application:
     name: paas-user-service
-
+  redis:
+    #单机配置信息
+    #    host: 175.178.25.239
+    #    port: 6379
+    password: 123456ABC@
+    #哨兵配置访问信息
+    sentinel:
+      master: mymaster
+      nodes: 175.178.25.239:26379,175.178.25.239:26380,175.178.25.239:26381
   #数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
