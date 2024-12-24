@@ -4,6 +4,16 @@ server:
 spring:
   application:
     name: paas-user-service
+  #邮箱服务配置
+  mail:
+    host: smtp.qq.com #发送邮件服务器
+    username: 1735529974@qq.com #发送邮件的邮箱地址
+    password: dzxspsploqtmdfdc #客户端授权码，不是邮箱密码,网易的是自己设置的
+    from: 1735529974@qq.com # 发送邮件的地址，和上面username一致
+    properties.mail.smtp.starttls.enable: true
+    properties.mail.smtp.starttls.required: true
+    properties.mail.smtp.ssl.enable: true
+    default-encoding: utf-8
   redis:
     #单机配置信息
     #    host: 175.178.25.239
@@ -19,7 +29,6 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/paas_user?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
-
 #配置plus打印sql日志
 mybatis-plus:
   configuration:
