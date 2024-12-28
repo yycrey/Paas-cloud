@@ -12,6 +12,7 @@ import paas.rey.enums.BizCodeEnum;
 import paas.rey.enums.SendCodeEnum;
 import paas.rey.exception.BizException;
 import paas.rey.mapper.UserMapper;
+import paas.rey.model.LoginUser;
 import paas.rey.model.UserDO;
 import paas.rey.request.UserLoginRequest;
 import paas.rey.request.UserRegisterRequest;
@@ -19,6 +20,7 @@ import paas.rey.service.NotifyService;
 import paas.rey.service.UserService;
 import org.springframework.stereotype.Service;
 import paas.rey.utils.CommonUtil;
+import paas.rey.utils.JWTUtil;
 import paas.rey.utils.JsonData;
 
 import java.util.HashMap;
@@ -127,10 +129,11 @@ public class UserServiceImpl  implements UserService {
                     .md5Crypt(userLoginRequest.getPwd().getBytes(), userDO.getSecret());
             if(pwd.equals(userDO.getPwd())){
                 //密码正确，则返回token令牌
-                String token = CommonUtil.getUUID();
-                HashMap<String, Object> stringObjectHashMap = new HashMap<>();
-                stringObjectHashMap.put("token",token);
-                return JsonData.buildSuccess(BizCodeEnum.ACCOUNT_SUCCESS,stringObjectHashMap);
+                LoginUser loginUser = new LoginUser();
+                BeanUtils.copyProperties(userDO,loginUser);
+                String token = JWTUtil.getJsonWebToken(loginUser);
+
+                return JsonData.buildSuccess(BizCodeEnum.ACCOUNT_SUCCESS,token);
             }else{
                 //密码错误，则返回错误信息
                 return JsonData.buildError(BizCodeEnum.ACCOUNT_PWD_ERROR);
