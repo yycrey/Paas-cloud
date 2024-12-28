@@ -57,6 +57,7 @@ public class JWTUtil {
                 .claim("head_img", loginUser.getHeadImg())
                 .claim("name", loginUser.getName())
                 .claim("mail", loginUser.getMail())
+                .claim("ip", loginUser.getIp())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPRICE))
                 .signWith(SignatureAlgorithm.HS256,SECRET).compact();

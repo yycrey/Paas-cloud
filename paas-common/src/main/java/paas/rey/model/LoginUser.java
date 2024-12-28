@@ -21,4 +21,6 @@ public class LoginUser {
         private String headImg;
         @ApiModelProperty(value = "用户邮箱")
         private String mail;
+        @ApiModelProperty(value = "用户登录ip",example = "181.232.121.33")
+        private String ip;
 }

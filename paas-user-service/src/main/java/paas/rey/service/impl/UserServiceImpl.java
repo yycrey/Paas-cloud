@@ -27,8 +27,6 @@ import paas.rey.utils.JsonData;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -158,17 +156,21 @@ public class UserServiceImpl  implements UserService {
         if(maps.isEmpty()){
             throw new NullPointerException("传递参数为空");
         }
+        String access_token = (String) maps.get("ACCESS_TOKEN");
+        Claims claims = JWTUtil.checkJWT(access_token);
+        //查看令牌是否解析成功
+        if(null == claims){
+            return JsonData.buildResult(BizCodeEnum.ACCOUNT_RELOGIN);
+        }
         //获取refreshToken
         String refreshToken = (String)redisTemplate.opsForValue().get(REFRESH_TOKEN);
         if(refreshToken == null){
             //告诉客户端重新登录
             return JsonData.buildResult(BizCodeEnum.ACCOUNT_RELOGIN);
         }
-
-        String access_token = (String) maps.get("ACCESS_TOKEN");
-        Claims claims = JWTUtil.checkJWT(access_token);
-        //查看令牌是否解析成功
-        if(null == claims){
+        //判断是否是同一个ip的用户，如果不是，则需要重新登录
+        if(!(claims.get("ip").toString().equals(maps.get("ip")))){
+            //告诉客户端重新登录
             return JsonData.buildResult(BizCodeEnum.ACCOUNT_RELOGIN);
         }
 
@@ -176,6 +178,7 @@ public class UserServiceImpl  implements UserService {
         loginUser.setMail(claims.get("mail").toString());
         loginUser.setHeadImg(claims.get("head_img").toString());
         loginUser.setName(claims.get("name").toString());
+        loginUser.setIp(claims.get("ip").toString());
         setFreshToken();
         //返回给前端一个新的token
         return JsonData.buildSuccess(BizCodeEnum.ACCOUNT_SUCCESS,JWTUtil.getJsonWebToken(loginUser));
