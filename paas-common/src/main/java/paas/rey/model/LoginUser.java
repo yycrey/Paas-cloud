@@ -2,6 +2,8 @@ package paas.rey.model;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @Author yeyc
@@ -11,6 +13,7 @@ import lombok.Data;
  * @Exception
  **/
 @Data
+@ToString
 public class LoginUser {
 
         @ApiModelProperty(value = "用户id",example = "1")
@@ -23,4 +26,15 @@ public class LoginUser {
         private String mail;
         @ApiModelProperty(value = "用户登录ip",example = "181.232.121.33")
         private String ip;
+
+        public LoginUser(long id, String name, String mail, String headImg, String ip) {
+                this.id = id;
+                this.name = name;
+                this.mail = mail;
+                this.headImg = headImg;
+                this.ip = ip;
+        }
+
+        public LoginUser() {
+        }
 }

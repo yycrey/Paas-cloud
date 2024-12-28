@@ -22,7 +22,7 @@ import paas.rey.utils.JsonData;
  */
 @Api(tags = "收货地址模块")
 @RestController
-@RequestMapping("/api/v1/addressDO")
+@RequestMapping("/api/address/v1/")
 public class AddressController {
 
     @Autowired

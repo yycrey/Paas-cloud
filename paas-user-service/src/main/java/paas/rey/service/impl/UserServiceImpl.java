@@ -143,7 +143,6 @@ public class UserServiceImpl  implements UserService {
                 return JsonData.buildError(BizCodeEnum.ACCOUNT_PWD_ERROR);
             }
     }
-
     /**
      * @Description: refreshToken
      * @Param: [maps]

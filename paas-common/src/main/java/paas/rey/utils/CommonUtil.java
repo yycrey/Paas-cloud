@@ -1,9 +1,13 @@
 package paas.rey.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import paas.rey.enums.BizCodeEnum;
 import paas.rey.exception.BizException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -17,6 +21,7 @@ import java.util.Random;
  * @Param
  * @Exception
  **/
+@Slf4j
 public class CommonUtil {
     /**
      * 获取ip
@@ -127,5 +132,24 @@ public class CommonUtil {
             saltString.append(ALL_CHAR_NUM.charAt(random.nextInt(ALL_CHAR_NUM.length())));
         }
         return saltString.toString();
+    }
+
+    /**
+     * @Description: 响应Json数据给前端
+     * @Param: []
+     * @Return: java.lang.String
+     * @Author: yeyc
+     * @Date: 2024/12/28
+     */
+    public static void sendJsonMessage(HttpServletResponse response, Object object){
+        ObjectMapper mapper = new ObjectMapper();
+        response.setContentType("application/json; charset=utf-8");
+        try (PrintWriter printWriter = response.getWriter()){
+            printWriter.write(mapper.writeValueAsString(object));
+            printWriter.close();
+            response.flushBuffer();
+        } catch (Exception e) {
+           log.info("响应Json数据给前端失败:{}",e.getMessage());
+        }
     }
 }

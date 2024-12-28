@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @Api(tags = "用户模块")
 @RestController
-@RequestMapping("/api/v1/userDO")
+@RequestMapping("/api/User/v1/")
 public class UserController {
         @Autowired
         private FileService fileService;

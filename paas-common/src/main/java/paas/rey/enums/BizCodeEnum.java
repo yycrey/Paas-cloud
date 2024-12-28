@@ -32,6 +32,7 @@ public enum BizCodeEnum {
     ACCOUNT_PWD_ERROR(250003,"账号或者密码错误"),
     ACCOUNT_SUCCESS(250004,"用户登录成功"),
     ACCOUNT_RELOGIN(250005,"请重新登录重新登录"),
+    ACCOUNT_UNLOGIN(250005,"未登录"),
     /*
     随机数错误枚举类
      */
