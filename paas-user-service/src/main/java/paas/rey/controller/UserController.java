@@ -1,6 +1,4 @@
 package paas.rey.controller;
-
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -13,6 +11,8 @@ import paas.rey.request.UserRegisterRequest;
 import paas.rey.service.FileService;
 import paas.rey.service.UserService;
 import paas.rey.utils.JsonData;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -53,6 +53,21 @@ public class UserController {
         @PostMapping("/login")
         public JsonData login(@RequestBody UserLoginRequest userLoginRequest){
                 return userService.login(userLoginRequest);
+        }
+
+        /**
+         * @Description: 重置token
+         * 1. 先判断redis中refreshToken是否存在，如果存在。
+         * 2.解密前端传递过来的access_token
+         * @Param: []
+         * @Return: paas.rey.utils.JsonData
+         * @Author: yeyc
+         * @Date: 2024/12/28
+         */
+        @ApiOperation("重置token")
+        @PostMapping("/refreshToken")
+        public JsonData reFreshToken(@RequestBody Map<String,Object> maps){
+               return userService.reFreshToken(maps);
         }
 }
 

@@ -65,7 +65,7 @@ public class JWTUtil {
     }
     
     /**
-     * @Description: 校验token
+     * @Description: 校验token(解析)
      * @Param: [token]
      * @Return: io.jsonwebtoken.Claims
      * @Author: yeyc

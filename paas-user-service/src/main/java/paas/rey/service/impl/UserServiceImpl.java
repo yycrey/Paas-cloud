@@ -1,13 +1,14 @@
 package paas.rey.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import paas.rey.enums.BizCodeEnum;
 import paas.rey.enums.SendCodeEnum;
 import paas.rey.exception.BizException;
@@ -23,9 +24,11 @@ import paas.rey.utils.CommonUtil;
 import paas.rey.utils.JWTUtil;
 import paas.rey.utils.JsonData;
 
-import java.util.HashMap;
+import java.time.Duration;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -42,6 +45,11 @@ public class UserServiceImpl  implements UserService {
     private NotifyService notifyService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    private final static String REFRESH_TOKEN = "refresh_Token";
+
     /**
      * @Description: 用户邮箱注册
      * 1.校验验证码是否通过
@@ -68,8 +76,6 @@ public class UserServiceImpl  implements UserService {
         BeanUtils.copyProperties(userRegisterRequest,userDO);
         //设置盐
         userDO.setSecret("$1$"+CommonUtil.getStringNumRandom(8));
-
-//      userDO.setPwd(CommonUtil.MD5(userDO.getPwd()));
         //密码+盐处理
         userDO.setPwd(Md5Crypt.md5Crypt(userRegisterRequest.getPwd().getBytes(), userDO.getSecret()));
         if(CheckMail(userDO.getMail())){
@@ -132,11 +138,53 @@ public class UserServiceImpl  implements UserService {
                 LoginUser loginUser = new LoginUser();
                 BeanUtils.copyProperties(userDO,loginUser);
                 String token = JWTUtil.getJsonWebToken(loginUser);
-
+                setFreshToken();
                 return JsonData.buildSuccess(BizCodeEnum.ACCOUNT_SUCCESS,token);
             }else{
                 //密码错误，则返回错误信息
                 return JsonData.buildError(BizCodeEnum.ACCOUNT_PWD_ERROR);
             }
     }
+
+    /**
+     * @Description: refreshToken
+     * @Param: [maps]
+     * @Return: paas.rey.utils.JsonData
+     * @Author: yeyc
+     * @Date: 2024/12/28
+     */
+    @Override
+    public JsonData reFreshToken(Map<String, Object> maps) {
+        if(maps.isEmpty()){
+            throw new NullPointerException("传递参数为空");
+        }
+        //获取refreshToken
+        String refreshToken = (String)redisTemplate.opsForValue().get(REFRESH_TOKEN);
+        if(refreshToken == null){
+            //告诉客户端重新登录
+            return JsonData.buildResult(BizCodeEnum.ACCOUNT_RELOGIN);
+        }
+
+        String access_token = (String) maps.get("ACCESS_TOKEN");
+        Claims claims = JWTUtil.checkJWT(access_token);
+        //查看令牌是否解析成功
+        if(null == claims){
+            return JsonData.buildResult(BizCodeEnum.ACCOUNT_RELOGIN);
+        }
+
+        LoginUser loginUser = new LoginUser();
+        loginUser.setMail(claims.get("mail").toString());
+        loginUser.setHeadImg(claims.get("head_img").toString());
+        loginUser.setName(claims.get("name").toString());
+        setFreshToken();
+        //返回给前端一个新的token
+        return JsonData.buildSuccess(BizCodeEnum.ACCOUNT_SUCCESS,JWTUtil.getJsonWebToken(loginUser));
+    }
+
+        /*
+            设置新的freshToken,有效期为7天
+        */
+        private void setFreshToken(){
+            redisTemplate.opsForValue().setIfAbsent(REFRESH_TOKEN,CommonUtil.getUUID(),Duration.ofDays(7));
+        }
 }

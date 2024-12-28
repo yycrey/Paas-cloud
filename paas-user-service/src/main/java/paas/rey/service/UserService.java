@@ -4,6 +4,8 @@ import paas.rey.request.UserLoginRequest;
 import paas.rey.request.UserRegisterRequest;
 import paas.rey.utils.JsonData;
 
+import java.util.Map;
+
 /**
  * <p>
  *  服务类
@@ -15,4 +17,5 @@ import paas.rey.utils.JsonData;
 public interface UserService  {
     JsonData registerMail(UserRegisterRequest userRegisterRequest);
     JsonData login(UserLoginRequest userLoginRequest);
+    JsonData reFreshToken(Map<String,Object> maps);
 }
