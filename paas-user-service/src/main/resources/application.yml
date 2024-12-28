@@ -1,0 +1,49 @@
+server:
+  port: 9089
+  context-path: /user-service
+spring:
+  application:
+    name: paas-user-service
+  #邮箱服务配置
+  mail:
+    host:
+    username:
+    password:
+    from:
+    properties.mail.smtp.starttls.enable:
+    properties.mail.smtp.starttls.required:
+    properties.mail.smtp.ssl.enable:
+    default-encoding: utf-8
+  redis:
+    #单机配置信息
+    #    host: 175.178.25.239
+    #    port: 6379
+    password:
+    #哨兵配置访问信息
+    sentinel:
+      master:
+      nodes:
+  #数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url:
+    username:
+    password:
+#配置plus打印sql日志
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#阿里云OSS配置
+aliyun:
+  oss:
+    endpoint:
+    access-key-id:
+    access-key-secret:
+    bucketname:
+#设置日志级别,ERROR/WARN/INFO/DEBUG,默认是INFO以上才显示
+logging:
+  level:
+    root: INFO
+# swagger3 配置开关
+swagger:
+  iconfig: true
