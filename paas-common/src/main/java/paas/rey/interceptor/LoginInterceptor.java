@@ -44,11 +44,12 @@ public class LoginInterceptor implements HandlerInterceptor {
                       String headImg = claims.get("head_img").toString();
                       String mail = claims.get("mail").toString();
                       String name = claims.get("name").toString();
-//                      long id = Long.parseLong(claims.get("id").toString());
+                      long id = Long.parseLong(claims.get("id").toString());
                       LoginUser  loginUser =new LoginUser();
                       loginUser.setMail(mail);
                       loginUser.setHeadImg(headImg);
                       loginUser.setName(name);
+                      loginUser.setId(id);
 //                      request.setAttribute("loginUser",loginUser);
                     //通过threadLocal传递用户登录信息
                     threadLocal.set(loginUser);

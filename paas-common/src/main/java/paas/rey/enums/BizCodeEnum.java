@@ -41,7 +41,21 @@ public enum BizCodeEnum {
     /*
     附件上传
      */
-    CODE_FILE_USER_IMAGE(300001,"上传用户头像失败");
+    CODE_FILE_USER_IMAGE(300001,"上传用户头像失败"),
+
+
+    /*
+    数据库状态码
+     */
+    CODE_DATABASE_INSERT_SUCCESS(400001,"插入成功"),
+    CODE_DATABASE_INSERT_ERROR(400002,"插入失败"),
+    CODE_DATABASE_UPDATE_SUCCESS(400003,"更新成功"),
+    CODE_DATABASE_UPDATE_ERROR(400004,"更新失败"),
+    CODE_DATABASE_DELETE_SUCCESS(400005,"删除成功"),
+    CODE_DATABASE_DELETE_ERROR(400006,"删除失败"),
+    CODE_DATABASE_FIND_SUCCESS(400007,"查询成功"),
+    CODE_DATABASE_FIND_ERROR(400008,"查询失败");
+
 
     private final String message;
     private final int code;

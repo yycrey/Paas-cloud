@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import paas.rey.constant.CacheKey;
+import paas.rey.request.constant.CacheKey;
 import paas.rey.enums.BizCodeEnum;
 import paas.rey.enums.SendCodeEnum;
 import paas.rey.service.MailService;
