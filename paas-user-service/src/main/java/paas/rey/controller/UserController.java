@@ -69,5 +69,17 @@ public class UserController {
         public JsonData reFreshToken(@RequestBody Map<String,Object> maps){
                return userService.reFreshToken(maps);
         }
+        /**
+         * @Description: 个人信息查询
+         * @Param: 
+         * @Return: 
+         * @Author: yeyc
+         * @Date: 2024/12/29
+         */
+        @ApiOperation("个人信息查询")
+        @GetMapping ("/detail")
+        public JsonData detail(){
+                return userService.detail();
+        }
 }
 

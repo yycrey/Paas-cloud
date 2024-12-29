@@ -1,8 +1,7 @@
 package paas.rey.model;
-
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Setter;
 import lombok.ToString;
 
 /**
@@ -14,6 +13,7 @@ import lombok.ToString;
  **/
 @Data
 @ToString
+@Builder
 public class LoginUser {
 
         @ApiModelProperty(value = "用户id",example = "1")
@@ -34,7 +34,7 @@ public class LoginUser {
                 this.headImg = headImg;
                 this.ip = ip;
         }
-
         public LoginUser() {
         }
+
 }

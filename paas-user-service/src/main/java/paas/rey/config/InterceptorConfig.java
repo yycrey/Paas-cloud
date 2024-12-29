@@ -21,8 +21,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
     return new LoginInterceptor();
   }
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new paas.rey.interceptor
-            .LoginInterceptor())
+    registry.addInterceptor(loginInterceptor())
             //拦截路径
             .addPathPatterns("/api/notify/*/**", "/api/User/*/**","/api/address/*/**")
             //放行路径

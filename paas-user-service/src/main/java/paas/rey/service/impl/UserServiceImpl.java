@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 import paas.rey.enums.BizCodeEnum;
 import paas.rey.enums.SendCodeEnum;
 import paas.rey.exception.BizException;
+import paas.rey.interceptor.LoginInterceptor;
 import paas.rey.mapper.UserMapper;
 import paas.rey.model.LoginUser;
 import paas.rey.model.UserDO;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import paas.rey.utils.CommonUtil;
 import paas.rey.utils.JWTUtil;
 import paas.rey.utils.JsonData;
+import paas.rey.vo.UserVO;
 
 import java.time.Duration;
 import java.util.List;
@@ -173,20 +175,30 @@ public class UserServiceImpl  implements UserService {
             return JsonData.buildResult(BizCodeEnum.ACCOUNT_RELOGIN);
         }
 
-        LoginUser loginUser = new LoginUser();
-        loginUser.setMail(claims.get("mail").toString());
-        loginUser.setHeadImg(claims.get("head_img").toString());
-        loginUser.setName(claims.get("name").toString());
-        loginUser.setIp(claims.get("ip").toString());
+        LoginUser loginUser = LoginUser.builder()
+                .mail(claims.get("mail").toString())
+                .ip(claims.get("ip").toString())
+                .headImg(claims.get("head_img").toString())
+                .name(claims.get("name").toString()).build();
         setFreshToken();
         //返回给前端一个新的token
         return JsonData.buildSuccess(BizCodeEnum.ACCOUNT_SUCCESS,JWTUtil.getJsonWebToken(loginUser));
     }
 
-        /*
-            设置新的freshToken,有效期为7天
-        */
+    /*
+        设置新的freshToken,有效期为7天
+    */
         private void setFreshToken(){
             redisTemplate.opsForValue().setIfAbsent(REFRESH_TOKEN,CommonUtil.getUUID(),Duration.ofDays(7));
         }
+
+
+    @Override
+    public JsonData detail() {
+        LoginUser loginUser = LoginInterceptor.threadLocal.get();
+        UserDO userDO = userMapper.selectOne(new QueryWrapper<UserDO>().eq("mail",loginUser.getMail()));
+        UserVO userVo = new UserVO();
+        BeanUtils.copyProperties(userDO,userVo);
+        return JsonData.buildSuccess(userVo);
+    }
 }

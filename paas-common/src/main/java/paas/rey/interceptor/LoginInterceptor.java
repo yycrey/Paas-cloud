@@ -40,14 +40,19 @@ public class LoginInterceptor implements HandlerInterceptor {
                                 CommonUtil.sendJsonMessage(response, JsonData.buildResult(BizCodeEnum.ACCOUNT_UNLOGIN));
                                 return false;
                         }
-                      String ip = claims.get("ip").toString();
+//                      String ip = claims.get("ip").toString();
                       String headImg = claims.get("head_img").toString();
                       String mail = claims.get("mail").toString();
                       String name = claims.get("name").toString();
-                      long id = Long.parseLong(claims.get("id").toString());
-                      LoginUser  loginUser = new LoginUser(id,name,mail,headImg,ip);
-                      request.setAttribute("loginUser",loginUser);
-                      return true;
+//                      long id = Long.parseLong(claims.get("id").toString());
+                      LoginUser  loginUser =new LoginUser();
+                      loginUser.setMail(mail);
+                      loginUser.setHeadImg(headImg);
+                      loginUser.setName(name);
+//                      request.setAttribute("loginUser",loginUser);
+                    //通过threadLocal传递用户登录信息
+                    threadLocal.set(loginUser);
+                    return true;
                 }
                 CommonUtil.sendJsonMessage(response, JsonData.buildResult(BizCodeEnum.ACCOUNT_UNLOGIN));
                 return false;
