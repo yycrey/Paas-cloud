@@ -6,12 +6,15 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="paas-product" />
+        <module name="paas-product-service" />
         <module name="paas-coupon-service" />
         <module name="paas-common" />
         <module name="paas-order-service" />
         <module name="paas-user-service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="paas-product" target="11" />
+    </bytecodeTargetLevel>
   </component>
 </project>

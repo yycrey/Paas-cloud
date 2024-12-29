@@ -87,7 +87,9 @@ public class AddressServiceImpl implements AddressService {
         }
         AddressDO addressDO = new AddressDO();
         BeanUtils.copyProperties(addressRequest,addressDO);
-        addressMapper.update(addressDO,new QueryWrapper<AddressDO>().eq("id",addressDO.getId()));
+        addressMapper.update(addressDO,new QueryWrapper<AddressDO>()
+                .eq("id",addressDO.getId())
+                .eq("user_id",LoginInterceptor.threadLocal.get().getId()));
         return JsonData.buildSuccess(BizCodeEnum.CODE_DATABASE_UPDATE_SUCCESS.getCode());
     }
 

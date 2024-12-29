@@ -11,7 +11,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>paas-common</module>
-        <module>paas-product</module>
+        <module>paas-product-service</module>
         <module>paas-order-service</module>
         <module>paas-coupon-service</module>
         <module>paas-user-service</module>

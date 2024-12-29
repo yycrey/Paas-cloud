@@ -1,5 +1,4 @@
 package paas.rey.config;
-
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.generator.AutoGenerator;
@@ -55,7 +54,7 @@ public class MyBatisPlusGenerator {
         dsConfig.setDbType(DbType.MYSQL)
                 .setDriverName("com.mysql.cj.jdbc.Driver")
                 //TODO  TODO  TODO  TODO
-                .setUrl("jdbc:mysql://127.0.0.1:3306/paas_user?useSSL=false")
+                .setUrl("jdbc:mysql://127.0.0.1:3306/paas_coupon?useSSL=false")
                 .setUsername("root")
                 .setPassword("123456");
 
@@ -75,11 +74,11 @@ public class MyBatisPlusGenerator {
 
                 // 生成的表, 支持多表一起生成，以数组形式填写
                 //TODO  TODO  TODO  TODO
-                .setInclude("user","address");
+                .setInclude("coupon","coupon_record");
 
         //4. 包名策略配置
         PackageConfig pkConfig = new PackageConfig();
-        pkConfig.setParent("org.rey")
+        pkConfig.setParent("paas.rey")
                 .setMapper("mapper")
                 .setService("service")
                 .setController("controller")
@@ -95,6 +94,6 @@ public class MyBatisPlusGenerator {
 
         //6. 执行操作
         ag.execute();
-        System.out.println("======= USER 相关代码生成完毕  ========");
+        System.out.println("======= COUPON 相关代码生成完毕  ========");
     }
 }
