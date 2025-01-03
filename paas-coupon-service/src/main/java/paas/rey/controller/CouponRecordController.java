@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import paas.rey.request.NewUserRequest;
 import paas.rey.service.CouponRecordService;
 import paas.rey.utils.JsonData;
 
@@ -45,5 +46,21 @@ public class CouponRecordController {
                                           @PathVariable(value = "id",required = true)long id){
         return id <= 0L  ? JsonData.buildError("优惠券ID不能为空") :couponRecordService.getCouponRecordDetail(id);
     }
+    
+    
+    /**
+     * @Description: 新用户注册发放优惠券
+     * @Param: 
+     * @Return: 
+     * @Author: yeyc
+     * @Date: 2025/1/3
+     */
+    @ApiOperation("用户注册初始化优惠券")
+    @PostMapping("/newUserCoupon")
+    public JsonData newUserCoupon(@ApiParam(value = "用户请求对象",required = true)
+                                  @RequestBody NewUserRequest newUserRequest){
+        return couponRecordService.newUserCoupon(newUserRequest);
+    }
+
 }
 

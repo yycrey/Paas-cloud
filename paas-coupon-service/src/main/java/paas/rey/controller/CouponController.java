@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import paas.rey.enums.CategoryEnum;
+import paas.rey.request.NewUserRequest;
 import paas.rey.service.CouponService;
 import paas.rey.utils.JsonData;
 
@@ -43,7 +45,14 @@ public class CouponController {
         @GetMapping("addPrmototionCoupon/{coupon_id}/{coupon_category}")
         public JsonData addPrmototionCoupon(@ApiParam(value = "优惠券ID",required = true)
                                                    @PathVariable(value = "coupon_id",required = true)long couponId) {
-            return JsonData.buildSuccess(couponService.addPrmototionCoupon(couponId));
+            return JsonData.buildSuccess(couponService.addPrmototionCoupon(couponId, CategoryEnum.NEW_USER));
         }
+
+    @ApiOperation("用户注册初始化优惠券")
+    @PostMapping("/newUserCoupon")
+    public JsonData newUserCoupon(@ApiParam(value = "用户请求对象",required = true)
+                                  @RequestBody NewUserRequest newUserRequest){
+        return couponService.newUserCoupon(newUserRequest);
+    }
 }
 

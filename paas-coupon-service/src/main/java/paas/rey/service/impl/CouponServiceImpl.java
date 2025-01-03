@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import paas.rey.enums.BizCodeEnum;
 import paas.rey.enums.CategoryEnum;
 import paas.rey.enums.CouponPublishEnum;
@@ -23,6 +24,7 @@ import paas.rey.mapper.CouponRecordMapper;
 import paas.rey.model.CouponDO;
 import paas.rey.model.CouponRecordDO;
 import paas.rey.model.LoginUser;
+import paas.rey.request.NewUserRequest;
 import paas.rey.service.CouponService;
 import paas.rey.utils.CommonUtil;
 import paas.rey.utils.JsonData;
@@ -31,6 +33,7 @@ import paas.rey.vo.CouponVO;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -87,12 +90,12 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, CouponDO> imple
      */
     @Override
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
-    public JsonData addPrmototionCoupon(long couponId) {
+    public JsonData addPrmototionCoupon(long couponId,CategoryEnum category) {
         LoginUser loginUser = LoginInterceptor.threadLocal.get();
         //查询优惠券数据
         CouponDO couponDO = couponMapper.selectOne(new QueryWrapper<CouponDO>()
                 .eq("id", couponId)
-                .eq("category",CouponStateEnum.NEW)
+                .eq("category", CategoryEnum.NEW_USER.name())
                 .eq("publish",CouponPublishEnum.PUBLISH));
         //开始加分布式锁
         //防止有优惠券超发的问题
@@ -114,7 +117,26 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, CouponDO> imple
         return JsonData.buildSuccess();
     }
 
-    
+    @Override
+    @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+    public JsonData newUserCoupon(NewUserRequest newUserRequest) {
+        if(ObjectUtils.isEmpty(newUserRequest)){
+            throw new BizException(BizCodeEnum.ACCOUNT_UNREGISTER);
+        }
+        LoginUser loginUser = new LoginUser();
+        BeanUtils.copyProperties(newUserRequest,loginUser);
+        LoginInterceptor.threadLocal.set(loginUser);
+
+        List<CouponDO> couponDOList = couponMapper.selectList(new QueryWrapper<CouponDO>().
+                eq("category",CategoryEnum.NEW_USER.name()));
+        for(CouponDO couponDO:couponDOList){
+            this.addPrmototionCoupon(couponDO.getId(),CategoryEnum.NEW_USER);
+        }
+
+        return null;
+    }
+
+
     /**
      * @Description: 校验优惠券
      * @Param: [couponDO, couponId]

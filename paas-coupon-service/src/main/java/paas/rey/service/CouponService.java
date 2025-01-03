@@ -2,7 +2,9 @@ package paas.rey.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import paas.rey.enums.CategoryEnum;
 import paas.rey.model.CouponDO;
+import paas.rey.request.NewUserRequest;
 import paas.rey.utils.JsonData;
 
 import java.util.Map;
@@ -24,5 +26,7 @@ public interface CouponService extends IService<CouponDO> {
    /*
     领取优惠券
      */
-    JsonData addPrmototionCoupon(long couponId);
+    JsonData addPrmototionCoupon(long couponId, CategoryEnum category);
+
+    JsonData newUserCoupon(NewUserRequest newUserRequest);
 }

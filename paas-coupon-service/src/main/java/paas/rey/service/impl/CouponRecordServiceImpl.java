@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import paas.rey.enums.BizCodeEnum;
@@ -13,6 +14,7 @@ import paas.rey.interceptor.LoginInterceptor;
 import paas.rey.mapper.CouponRecordMapper;
 import paas.rey.model.CouponRecordDO;
 import paas.rey.model.LoginUser;
+import paas.rey.request.NewUserRequest;
 import paas.rey.service.CouponRecordService;
 import paas.rey.utils.JsonData;
 import paas.rey.vo.CouponRecordVO;
@@ -86,6 +88,12 @@ public class CouponRecordServiceImpl extends ServiceImpl<CouponRecordMapper, Cou
         }
         CouponRecordVO couponRecordVO = BeanProcess(couponRecordDO);
         return JsonData.buildSuccess(BizCodeEnum.CODE_DATABASE_FIND_SUCCESS,couponRecordVO);
+    }
+
+    @Override
+    @Transactional()
+    public JsonData newUserCoupon(NewUserRequest newUserRequest) {
+        return null;
     }
 
 }
