@@ -13,5 +13,5 @@ import paas.rey.model.CouponDO;
  * @since 2024-12-29
  */
 public interface CouponMapper extends BaseMapper<CouponDO> {
-
+    int reduceStock(Long couponId);
 }

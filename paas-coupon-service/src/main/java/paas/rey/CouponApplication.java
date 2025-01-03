@@ -2,6 +2,7 @@ package paas.rey;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @Author yeyc
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @Exception
  **/
 @SpringBootApplication
+@EnableTransactionManagement
 @MapperScan("paas.rey.mapper")
 public class CouponApplication {
     public static void main(String[] args) {
@@ -18,3 +20,10 @@ public class CouponApplication {
                 .run(CouponApplication.class, args);
     }
 }
+
+
+
+
+
+
+

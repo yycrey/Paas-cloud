@@ -27,10 +27,10 @@ public class LoginInterceptor implements HandlerInterceptor {
         @Override
         public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
                 //默认从头部获取
-                String accessToken = request.getHeader("accessToken");
+                String accessToken = request.getHeader("token");
                 if(null == accessToken){
                         //头部没有则从参数获取
-                        accessToken = request.getParameter("accessToken");
+                        accessToken = request.getParameter("token");
                 }
                 if(StringUtils.isNotBlank(accessToken)){
                         //如果有token，则校验token是否正确

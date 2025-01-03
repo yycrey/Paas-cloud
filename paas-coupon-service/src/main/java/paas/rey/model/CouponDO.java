@@ -87,5 +87,5 @@ public class CouponDO implements Serializable {
      */
     private BigDecimal conditionPrice;
 
-
+    private int version;
 }

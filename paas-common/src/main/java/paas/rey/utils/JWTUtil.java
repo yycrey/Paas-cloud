@@ -25,7 +25,11 @@ public class JWTUtil {
     /*
        token失效时间EXPRICE
          */
-    private static final Long EXPRICE = 1000 * 60 * 60 * 24 * 7L;
+      private static final Long EXPRICE = 1000 * 60 * 60 * 24 * 7L;
+        /*
+        测试，过期1秒
+         */
+//    private static final Long EXPRICE = 1000L;
 
     /*
     密钥

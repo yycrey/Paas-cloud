@@ -157,7 +157,7 @@ public class UserServiceImpl  implements UserService {
         if(maps.isEmpty()){
             throw new NullPointerException("传递参数为空");
         }
-        String access_token = (String) maps.get("ACCESS_TOKEN");
+        String access_token = (String) maps.get("token");
         Claims claims = JWTUtil.checkJWT(access_token);
         //查看令牌是否解析成功
         if(null == claims){
@@ -189,7 +189,7 @@ public class UserServiceImpl  implements UserService {
         设置新的freshToken,有效期为7天
     */
         private void setFreshToken(){
-            redisTemplate.opsForValue().setIfAbsent(REFRESH_TOKEN,CommonUtil.getUUID(),Duration.ofDays(7));
+//            redisTemplate.opsForValue().setIfAbsent(REFRESH_TOKEN,CommonUtil.getUUID(),Duration.ofDays(7));
         }
 
 

@@ -1,14 +1,12 @@
 package paas.rey.controller;
 
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import paas.rey.service.CouponService;
 import paas.rey.utils.JsonData;
 
@@ -20,6 +18,7 @@ import paas.rey.utils.JsonData;
  * @author yeycrey
  * @since 2024-12-29
  */
+@Api("优惠券模块")
 @RestController
 @RequestMapping("/api/coupon/v1/")
 public class CouponController {
@@ -31,6 +30,20 @@ public class CouponController {
         public JsonData pageCouponList(@ApiParam(value = "页码",required = true) @RequestParam(value = "page",required = true)int page,
                                        @ApiParam(value = "每页数量",required = true)@RequestParam(value = "size",required = true)int size) {
             return JsonData.buildSuccess(couponService.pageCouponList(page,size));
+        }
+        
+        /**
+         * @Description: 领券接口
+         * @Param: 
+         * @Return: 
+         * @Author: yeyc
+         * @Date: 2024/12/31
+         */
+        @ApiOperation("领取优惠券")
+        @GetMapping("addPrmototionCoupon/{coupon_id}/{coupon_category}")
+        public JsonData addPrmototionCoupon(@ApiParam(value = "优惠券ID",required = true)
+                                                   @PathVariable(value = "coupon_id",required = true)long couponId) {
+            return JsonData.buildSuccess(couponService.addPrmototionCoupon(couponId));
         }
 }
 
