@@ -19,5 +19,4 @@ public interface CouponRecordService extends IService<CouponRecordDO> {
     JsonData getCouponRecord(int page,int size);
     JsonData getCouponRecordDetail(long id);
 
-    JsonData newUserCoupon(NewUserRequest newUserRequest);
 }

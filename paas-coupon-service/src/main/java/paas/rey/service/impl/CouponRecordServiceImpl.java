@@ -90,10 +90,5 @@ public class CouponRecordServiceImpl extends ServiceImpl<CouponRecordMapper, Cou
         return JsonData.buildSuccess(BizCodeEnum.CODE_DATABASE_FIND_SUCCESS,couponRecordVO);
     }
 
-    @Override
-    @Transactional()
-    public JsonData newUserCoupon(NewUserRequest newUserRequest) {
-        return null;
-    }
 
 }

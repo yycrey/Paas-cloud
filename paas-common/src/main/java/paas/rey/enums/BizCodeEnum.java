@@ -101,6 +101,7 @@ public enum BizCodeEnum {
     CODE_DATABASE_DELETE_ERROR(400006,"删除失败"),
     CODE_DATABASE_FIND_SUCCESS(400007,"查询成功"),
     CODE_DATABASE_FIND_ERROR(400008,"查询失败"),
+    CODE_PARAM_ERROR(400009,"分页参数错误"),
     /**
      * 文件相关
      */
