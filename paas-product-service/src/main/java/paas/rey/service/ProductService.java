@@ -15,4 +15,6 @@ import paas.rey.utils.JsonData;
 public interface ProductService extends IService<ProductDO> {
 
     JsonData pageList(int page, int size);
+
+    JsonData getProductDetail(Long productId);
 }

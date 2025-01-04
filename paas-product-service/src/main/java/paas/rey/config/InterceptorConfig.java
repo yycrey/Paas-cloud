@@ -23,9 +23,9 @@ public class InterceptorConfig implements WebMvcConfigurer {
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(loginInterceptor())
             //拦截路径
-            .addPathPatterns("/api/banner/*/**", "api/product/*/**")
+            .addPathPatterns("/api/banner/*/**", "/api/product/*/**")
             //放行路径
-            .excludePathPatterns("/api/banner/*/**", "api/product/*/**");
+            .excludePathPatterns("/api/banner/*/**");
       WebMvcConfigurer.super.addInterceptors(registry);
   }
 }

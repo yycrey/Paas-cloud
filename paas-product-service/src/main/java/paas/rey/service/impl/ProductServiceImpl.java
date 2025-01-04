@@ -56,4 +56,19 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
         BeanUtils.copyProperties(productDO,productVO);
         return productVO;
     }
+
+    @ApiOperation(value = "商品详情接口")
+    @Override
+    public JsonData getProductDetail(Long productId) {
+        if (productId==null){
+            return JsonData.buildError(BizCodeEnum.CODE_PARAM_ERROR);
+        }
+        ProductDO productDO = productMapper.selectOne(new QueryWrapper<ProductDO>()
+                .eq("id",productId));
+        if(productDO == null){
+            return JsonData.buildError(BizCodeEnum.CODE_DATABASE_FIND_ERROR);
+        }
+        ProductVO productVO= this.beanProcess(productDO);
+        return JsonData.buildSuccess(BizCodeEnum.CODE_DATABASE_FIND_SUCCESS,productVO);
+    }
 }
