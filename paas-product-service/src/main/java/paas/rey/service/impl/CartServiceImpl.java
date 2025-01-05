@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import paas.rey.constant.CacheKey;
 import paas.rey.enums.BizCodeEnum;
+import paas.rey.exception.BizException;
 import paas.rey.interceptor.LoginInterceptor;
 import paas.rey.model.LoginUser;
 import paas.rey.request.CartItemRequest;
@@ -87,7 +88,7 @@ public class CartServiceImpl implements CartService {
      * @Date: 2025/1/5
      */
     @Override
-    public void deleteCartItem() {
+    public void clearCartItem() {
         String clearKey = this.getCartKey();
         redisTemplate.delete(clearKey);
     }
@@ -106,6 +107,37 @@ public class CartServiceImpl implements CartService {
         CartVO cartVO = new CartVO();
         cartVO.setCartItems(cartItemVOS);
         return JsonData.buildSuccess(BizCodeEnum.CODE_DATABASE_FIND_SUCCESS, cartVO);
+    }
+    
+    /**
+     * @Description: 根据商品id删除对应商品
+     * @Param: []
+     * @Return: void
+     * @Author: yeyc
+     * @Date: 2025/1/5
+     */
+    @Override
+    public void deleteCartItem(long productId) {
+        BoundHashOperations<String, Object, Object> getMyOperation = myOperation();
+        getMyOperation.delete(String.valueOf(productId));
+    }
+    /**
+     * @Description: 更新商品数量
+     * @Param: [cartItemRequest]
+     * @Return: void
+     * @Author: yeyc
+     * @Date: 2025/1/5
+     */
+    @Override
+    public void changeCartItem(CartItemRequest cartItemRequest) {
+        BoundHashOperations<String, Object, Object> getMyOperation = myOperation();
+        Object str = getMyOperation.get(String.valueOf(cartItemRequest.getProductId()));
+        if(null == str){
+            throw new BizException(BizCodeEnum.ORDER_CONFIRM_CART_ITEM_NOT_EXIST);
+        }
+        CartItemVO cartItemVO = JSON.parseObject(str.toString(), CartItemVO.class);
+        cartItemVO.setBuyNum((int) cartItemRequest.getProductBynum());
+        getMyOperation.put(cartItemVO.getProductId(),JSON.toJSONString(cartItemVO));
     }
 
 

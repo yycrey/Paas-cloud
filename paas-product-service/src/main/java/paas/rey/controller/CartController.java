@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import paas.rey.request.CartItemRequest;
 import paas.rey.service.CartService;
 import paas.rey.utils.JsonData;
-import springfox.documentation.spring.web.json.Json;
 
 /**
  * @Author yeyc
@@ -38,9 +37,9 @@ public class CartController {
          * @Date: 2025/1/5
          */
         @ApiOperation("清空购物车")
-        @GetMapping("deleteCartItem")
-        public JsonData deleteCartItem() {
-                cartService.deleteCartItem();
+        @GetMapping("clearCartItem")
+        public JsonData clearCartItem() {
+                cartService.clearCartItem();
                 return JsonData.buildSuccess();
         }
 
@@ -56,4 +55,33 @@ public class CartController {
         public JsonData findCartItemByUserId() {
                 return cartService.getCartItem();
         }
+
+        /**
+         * @Description: 查看我的购物车数据
+         * @Param: []
+         * @Return: paas.rey.utils.JsonData
+         * @Author: yeyc
+         * @Date: 2025/1/5
+         */
+        @ApiOperation("删除我的购物车数据")
+        @GetMapping("deleteCartItem/{product_id}")
+        public JsonData deleteCartItem(@PathVariable(value = "product_id",required = true) long productId) {
+                 cartService.deleteCartItem(productId);
+                 return JsonData.buildSuccess();
+        }
+        
+        /**
+         * @Description: 修改购物车商品数量
+         * @Param: [productId]
+         * @Return: paas.rey.utils.JsonData
+         * @Author: yeyc
+         * @Date: 2025/1/5
+         */
+        @ApiOperation("修改购物车商品数量")
+        @PostMapping("changeCartItem")
+        public JsonData changeCartItem(@RequestBody  CartItemRequest cartItemRequest) {
+                cartService.changeCartItem(cartItemRequest);
+                return JsonData.buildSuccess();
+        }
+        
 }

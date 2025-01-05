@@ -6,7 +6,11 @@ import paas.rey.utils.JsonData;
 public interface CartService {
     void addCartItem(CartItemRequest cartItemRequest);
 
-    void deleteCartItem();
+    void clearCartItem();
 
     JsonData getCartItem();
+
+    void deleteCartItem(long productId);
+
+    void changeCartItem(CartItemRequest cartItemRequest);
 }
