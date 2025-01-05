@@ -9,7 +9,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * @Author yeyc
- * @Description redis全局配置类
+ * @Description redis自定义序列化器，处理redis存入乱码
  * @Date 2024/12/24
  * @Param
  * @Exception

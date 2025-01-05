@@ -17,6 +17,10 @@ import java.util.Date;
 @Data
 public class ProductVO {
 
+    /*
+     * 主键
+     */
+    private Long id;
     /**
      * 标题
      */
@@ -35,12 +39,12 @@ public class ProductVO {
     /**
      * 老价格
      */
-    private BigDecimal oldPrice;
+    private BigDecimal oldAmount;
 
     /**
      * 新价格
      */
-    private BigDecimal price;
+    private BigDecimal amount;
 
     /**
      * 库存

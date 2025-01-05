@@ -13,10 +13,11 @@ import paas.rey.service.ProductService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import paas.rey.utils.JsonData;
-import paas.rey.vo.BannerVO;
 import paas.rey.vo.ProductVO;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -70,5 +71,21 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
         }
         ProductVO productVO= this.beanProcess(productDO);
         return JsonData.buildSuccess(BizCodeEnum.CODE_DATABASE_FIND_SUCCESS,productVO);
+    }
+    
+    /**
+     * @Description: 批量查询商品价格
+     * @Param: []
+     * @Return: java.util.List<paas.rey.model.ProductDO>
+     * @Author: yeyc
+     * @Date: 2025/1/5
+     */
+    @Override
+    public List<ProductVO> getProductList(List<Long> productIds) {
+        if (productIds.isEmpty()){
+            throw new NullPointerException("未传入商品id，无法查明商品信息");
+        }
+        List<ProductDO> productDOList = productMapper.selectList(new QueryWrapper<ProductDO>().in("id",productIds));
+        return productDOList.stream().map(this::beanProcess).collect(Collectors.toList());
     }
 }
