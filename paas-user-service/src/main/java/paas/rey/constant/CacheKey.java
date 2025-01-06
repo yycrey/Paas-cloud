@@ -1,4 +1,4 @@
-package paas.rey.request.constant;
+package paas.rey.constant;
 
 /**
  * @Author yeyc
