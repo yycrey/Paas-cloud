@@ -29,6 +29,9 @@ public class JsonData {
     private String msg;
 
 
+
+    public JsonData() {
+    }
     /**
      * 成功，传入数据
      * @return

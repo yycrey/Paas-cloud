@@ -116,7 +116,14 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, CouponDO> imple
         }
         return JsonData.buildSuccess();
     }
-
+    
+    /**
+     * @Description: 新用户初始化领券
+     * @Param: [newUserRequest]
+     * @Return: paas.rey.utils.JsonData
+     * @Author: yeyc
+     * @Date: 2025/1/7
+     */
     @Override
     @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
     public JsonData newUserCoupon(NewUserRequest newUserRequest) {

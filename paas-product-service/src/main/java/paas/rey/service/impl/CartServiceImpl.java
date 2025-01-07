@@ -1,6 +1,6 @@
 package paas.rey.service.impl;
 
-import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +71,7 @@ public class CartServiceImpl implements CartService {
             cartItemVO.setBuyNum((int) cartItemRequest.getProductBynum());
             cartItemVO.setAmount(productvo.getAmount());
             //添加到redis
-            myOperation.put(cartItemVO.getProductId(),JSON.toJSONString(cartItemVO));
+            myOperation.put(cartItemVO.getProductId(), JSON.toJSONString(cartItemVO));
 
         }else{
             //存在商品则修改数量

@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 import paas.rey.enums.BizCodeEnum;
 import paas.rey.enums.SendCodeEnum;
 import paas.rey.exception.BizException;
+import paas.rey.feign.CouponFeignService;
 import paas.rey.interceptor.LoginInterceptor;
 import paas.rey.mapper.UserMapper;
 import paas.rey.model.LoginUser;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import paas.rey.utils.CommonUtil;
 import paas.rey.utils.JWTUtil;
 import paas.rey.utils.JsonData;
+import paas.rey.vo.NewUserVO;
 import paas.rey.vo.UserVO;
 
 import java.time.Duration;
@@ -47,7 +49,8 @@ public class UserServiceImpl  implements UserService {
     private UserMapper userMapper;
     @Autowired
     private RedisTemplate redisTemplate;
-
+    @Autowired
+    private CouponFeignService couponFeignService;
     private final static String REFRESH_TOKEN = "refresh_Token";
 
     /**
@@ -82,7 +85,7 @@ public class UserServiceImpl  implements UserService {
             userMapper.insert(userDO);
             log.info("用户注册成功{}",userDO.getMail());
             //开始发放福利
-            userReigsterInitTask();
+            userReigsterInitTask(userDO);
             return JsonData.buildSuccess();
         }
         return JsonData.buildSuccess();
@@ -105,8 +108,12 @@ public class UserServiceImpl  implements UserService {
      * @Author: yeyc
      * @Date: 2024/12/25
      */
-    private void userReigsterInitTask(){
-        // TODO...
+    private void userReigsterInitTask(UserDO userDO){
+        NewUserVO newUserVO = new NewUserVO();
+        newUserVO.setId(userDO.getId());
+        newUserVO.setName(userDO.getName());
+        JsonData data = couponFeignService.addNewUserCoupon(newUserVO);
+        log.info("用户注册领券信息：{}",data);
     }
     
     /**
