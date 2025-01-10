@@ -27,6 +27,8 @@ public interface CouponService extends IService<CouponDO> {
     领取优惠券
      */
     JsonData addPrmototionCoupon(long couponId, CategoryEnum category);
-
+    /*
+    订单锁定
+     */
     JsonData newUserCoupon(NewUserRequest newUserRequest);
 }

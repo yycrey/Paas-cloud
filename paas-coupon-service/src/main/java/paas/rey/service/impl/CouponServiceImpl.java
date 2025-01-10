@@ -30,7 +30,6 @@ import paas.rey.utils.CommonUtil;
 import paas.rey.utils.JsonData;
 import paas.rey.vo.CouponVO;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;

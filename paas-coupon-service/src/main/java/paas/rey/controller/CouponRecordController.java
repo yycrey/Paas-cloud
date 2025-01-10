@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import paas.rey.request.LockCouponRecordRequest;
 import paas.rey.service.CouponRecordService;
 import paas.rey.utils.JsonData;
 
@@ -43,6 +44,12 @@ public class CouponRecordController {
     public JsonData getCouponRecordDetail(@ApiParam(value = "优惠券ID",required = true)
                                           @PathVariable(value = "id",required = true)long id){
         return id <= 0L  ? JsonData.buildError("优惠券ID不能为空") :couponRecordService.getCouponRecordDetail(id);
+    }
+
+    @ApiOperation("rpc-锁定 优惠券记录")
+    @PostMapping("/lockRecords")
+    public JsonData lockRecords(@ApiParam("锁定优惠券请求对象") @RequestBody LockCouponRecordRequest lockCouponRecordRequest){
+        return couponRecordService.lockRecords(lockCouponRecordRequest);
     }
 }
 

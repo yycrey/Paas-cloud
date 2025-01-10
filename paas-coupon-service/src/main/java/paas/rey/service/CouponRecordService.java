@@ -3,9 +3,8 @@ package paas.rey.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import paas.rey.model.CouponRecordDO;
-import paas.rey.request.NewUserRequest;
+import paas.rey.request.LockCouponRecordRequest;
 import paas.rey.utils.JsonData;
-import springfox.documentation.spring.web.json.Json;
 
 /**
  * <p>
@@ -18,5 +17,5 @@ import springfox.documentation.spring.web.json.Json;
 public interface CouponRecordService extends IService<CouponRecordDO> {
     JsonData getCouponRecord(int page,int size);
     JsonData getCouponRecordDetail(long id);
-
+    JsonData lockRecords(LockCouponRecordRequest lockCouponRecordRequest);
 }

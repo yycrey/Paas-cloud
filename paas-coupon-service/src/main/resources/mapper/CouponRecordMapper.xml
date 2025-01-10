@@ -23,4 +23,12 @@
         id, coupon_id, create_time, use_state, user_id, user_name, coupon_title, start_time, end_time, order_id, price, condition_price
     </sql>
 
+    <update id="lockCouponBash" >
+        update coupon_record set use_state = #{use_state}
+                             where user_id = #{user_id} and use_state = 'NEW'
+        and id in
+        <foreach collection="lockCouponRecordList" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
 </mapper>
