@@ -2,6 +2,9 @@ package paas.rey.model;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
  * @Author yeyc
@@ -11,8 +14,8 @@ import lombok.Data;
  * @Exception
  **/
 @Data
-public class CouponRecordMessage {
-    @ApiModelProperty(value = "消息id")
+public class CouponRecordMessage{
+
     private long id;
      /*
         订单id

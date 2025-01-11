@@ -23,8 +23,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(loginInterceptor())
             //拦截路径
-            .addPathPatterns("/api/productOrderDO/*/**", "/api/productOrderItemDO/*/**");
+            .addPathPatterns("/api/productOrderDO/*/**", "/api/productOrderItemDO/*/**")
             //放行路径
-//            .excludePathPatterns("/api/User/*/registerMail");
+            .excludePathPatterns("/api/productOrderDO/*/query_state");
   }
 }

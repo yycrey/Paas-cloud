@@ -187,9 +187,10 @@ public class CouponRecordServiceImpl extends ServiceImpl<CouponRecordMapper,Coup
                    couponTaskDO.setLockState(StockTaskEnum.FINISH.name());
                    couponTaskMapper.update(couponTaskDO,new QueryWrapper<CouponTaskDO>().eq("id",couponRecordMessage.getTaskId()));
                    log.info("订单已支付，修改库存锁定工单的状态为FINISH，消息{}",couponRecordMessage);
+                   return true;
                }
            }
-           //如果订单不存在
+            //如果订单不存在
             log.warn("订单不存在,或者订单被取消，确认消息，修改task状态为CANCEL。恢复优惠券表状态为NEW,消息{}",couponRecordMessage);
             couponTaskDO.setLockState(StockTaskEnum.CANCEL.name());
             couponTaskMapper.update(couponTaskDO,new QueryWrapper<CouponTaskDO>()

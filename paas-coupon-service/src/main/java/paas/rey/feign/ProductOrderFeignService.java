@@ -21,6 +21,6 @@ public interface ProductOrderFeignService {
      * @Author: yeyc
      * @Date: 2025/1/11
      */
-    @GetMapping("/api/order/v1/query_state")
+    @GetMapping("/api/productOrderDO/v1/query_state")
     JsonData queryProductOrderState(@RequestParam("out_trade_no")String outTradeNo);
 }
