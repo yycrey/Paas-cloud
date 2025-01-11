@@ -5,11 +5,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
 import paas.rey.enums.ClientTypeEnum;
 import paas.rey.enums.ProductOrderPayTypeEnum;
 import paas.rey.request.ConfirmOrderRequest;
@@ -33,6 +30,12 @@ import java.io.IOException;
 public class ProductOrderController {
         @Autowired
         private ProductOrderService productOrderService;
+
+        @GetMapping("query_state")
+        public JsonData queryProductOrderState(@RequestParam("out_trade_no")String outTradeNo){
+            return productOrderService.queryProductOrderState(outTradeNo);
+        }
+
 
         /**
          * @Description: 提交订单接口
@@ -71,7 +74,7 @@ public class ProductOrderController {
                         }
                     }
               }else{
-                  log.error("创建订单失败{}",jsonData.toString());
+                  log.error("创建订单失败{}", jsonData);
               }
         }
 
