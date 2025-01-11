@@ -1,12 +1,10 @@
 package paas.rey.controller;
-
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import paas.rey.enums.CategoryEnum;
 import paas.rey.request.NewUserRequest;
 import paas.rey.service.CouponService;
@@ -26,7 +24,8 @@ import paas.rey.utils.JsonData;
 public class CouponController {
         @Autowired
         private CouponService couponService;
-
+        @Autowired
+        private RabbitTemplate rabbitTemplate;
         @ApiOperation("分页查询优惠券列表")
         @GetMapping("pageCouponList")
         public JsonData pageCouponList(@ApiParam(value = "页码",required = true) @RequestParam(value = "page",required = true)int page,
@@ -53,6 +52,17 @@ public class CouponController {
     public JsonData newUserCoupon(@ApiParam(value = "用户请求对象",required = true)
                                   @RequestBody NewUserRequest newUserRequest){
         return couponService.newUserCoupon(newUserRequest);
+    }
+    /**
+     * @Description: mq测试
+     * @Param: []
+     * @Return: void
+     * @Author: yeyc
+     * @Date: 2025/1/11
+     */
+    @GetMapping("/testRabbitMQ")
+    public void testRabbitMQ(){
+        rabbitTemplate.convertAndSend("coupon.event.exchange", "coupon.release.delay.routing.key", "this is message");
     }
 }
 
