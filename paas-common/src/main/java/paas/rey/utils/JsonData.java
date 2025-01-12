@@ -1,5 +1,7 @@
 package paas.rey.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import paas.rey.enums.BizCodeEnum;
@@ -94,4 +96,17 @@ public class JsonData {
         return JsonData.buildCodeAndMsg(codeEnum.getCode(),codeEnum.getMessage());
     }
 
+    
+    /**
+     * @Description: 通过泛型，把传过来的json转换成对应class类
+     * 注意事项：
+     *      支持多单词转换成驼峰（序列化和反序列话）
+     * @Param: 
+     * @Return: 
+     * @Author: yeyc
+     * @Date: 2025/1/12
+     */
+    public<T> T getData(TypeReference<T> tTypeReference) {
+        return JSON.parseObject(JSON.toJSONString(data), tTypeReference);
+    }
 }

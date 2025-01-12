@@ -1,18 +1,20 @@
 package paas.rey.controller;
 
 
+import com.alibaba.fastjson.TypeReference;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import paas.rey.enums.ClientTypeEnum;
-import paas.rey.enums.ProductOrderPayTypeEnum;
+import paas.rey.feign.AddressFeignService;
+import paas.rey.interceptor.LoginInterceptor;
+import paas.rey.model.LoginUser;
 import paas.rey.request.ConfirmOrderRequest;
 import paas.rey.service.ProductOrderService;
+import paas.rey.utils.CommonUtil;
 import paas.rey.utils.JsonData;
-
+import paas.rey.vo.ProductOrderAddressVO;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -30,6 +32,8 @@ import java.io.IOException;
 public class ProductOrderController {
         @Autowired
         private ProductOrderService productOrderService;
+        @Autowired
+        private AddressFeignService addressFeignService;
 
         @GetMapping("query_state")
         public JsonData queryProductOrderState(@RequestParam("out_trade_no")String outTradeNo){
@@ -59,30 +63,49 @@ public class ProductOrderController {
         @ApiOperation(value = "提交订单")
         @PostMapping("confirmOrder")
         public void comfirmOrder(@ApiParam(value = "提交订单请求参数") @RequestBody ConfirmOrderRequest confirmOrderRequest){
-              JsonData jsonData = productOrderService.comfirmOrder(confirmOrderRequest);
-              if(jsonData.getCode() == 0){
-                    //支付来源
-                    String client = confirmOrderRequest.getClientType();
-                    //支付方式
-                    String payType = confirmOrderRequest.getPayType();
-                    if(ProductOrderPayTypeEnum.ALIPAY.name().equals(payType)){
-                        log.info("支付宝支付");
-
-                        //TODO... 支付类型
-                        if (ClientTypeEnum.H5.name().equals(client)){
-
-                        }
-                    }
-              }else{
-                  log.error("创建订单失败{}", jsonData);
-              }
+            //新建订单
+            LoginUser loginUser = LoginInterceptor.threadLocal.get();
+            long addressId = confirmOrderRequest.getAddressId();
+            //订单编号
+            String orderTradeNo = CommonUtil.getStringNumRandom(32);
+            ProductOrderAddressVO productOrderAddressVO = this.getAddressDetail(addressId);
+            log.info("收货地址信息：{}",productOrderAddressVO);
+//              JsonData jsonData = productOrderService.comfirmOrder(confirmOrderRequest);
+//              if(jsonData.getCode() == 0){
+//                    //支付来源
+//                    String client = confirmOrderRequest.getClientType();
+//                    //支付方式
+//                    String payType = confirmOrderRequest.getPayType();
+//                    if(ProductOrderPayTypeEnum.ALIPAY.name().equals(payType)){
+//                        log.info("支付宝支付");
+//
+//                        //TODO... 支付类型
+//                        if (ClientTypeEnum.H5.name().equals(client)){
+//
+//                        }
+//                    }
+//              }else{
+//                  log.error("创建订单失败{}", jsonData);
+//              }
         }
+    /**
+     * @Description: 通过地址id去寻找详细收货信息
+     * @Param: [addressId]
+     * @Return: paas.rey.vo.ProductOrderAddressVO
+     * @Author: yeyc
+     * @Date: 2025/1/12
+     */
+    private ProductOrderAddressVO getAddressDetail(long addressId) {
+       JsonData jsonData = addressFeignService.getAddressDetail(addressId);
+       if (jsonData.getCode() != 0){
+           throw new RuntimeException("获取地址信息失败");
+       }
+       return jsonData.getData(new TypeReference<ProductOrderAddressVO>(){});
+    }
 
-
-
-        /*
-        把处理结果返回到http相应中去
-         */
+    /*
+    把处理结果返回到http相应中去
+     */
         private void writeData(HttpServletResponse response, JsonData data){
             try{
                 response.setContentType("application/json;charset=utf-8");

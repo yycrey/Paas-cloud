@@ -17,5 +17,4 @@
     <sql id="Base_Column_List">
         id, product_id, buy_num, product_name, lock_state, out_trade_no, create_time
     </sql>
-
 </mapper>
