@@ -2,6 +2,7 @@ package paas.rey.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 import paas.rey.model.ProductTaskDO;
 
 /**
@@ -13,5 +14,4 @@ import paas.rey.model.ProductTaskDO;
  * @since 2025-01-08
  */
 public interface ProductTaskMapper extends BaseMapper<ProductTaskDO> {
-
 }

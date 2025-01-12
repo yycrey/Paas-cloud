@@ -25,7 +25,6 @@ import paas.rey.service.CouponRecordService;
 import paas.rey.service.CouponTaskService;
 import paas.rey.utils.JsonData;
 import paas.rey.vo.CouponRecordVO;
-import springfox.documentation.spring.web.json.Json;
 
 import java.util.Date;
 import java.util.HashMap;

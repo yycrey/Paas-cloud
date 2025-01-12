@@ -84,12 +84,6 @@ public enum BizCodeEnum {
     PAY_ORDER_STATE_ERROR(300006,"订单状态不正常"),
     PAY_ORDER_PAY_TIMEOUT(300007,"订单支付超时"),
 
-    /**
-     * 流控操作
-     */
-    CONTROL_FLOW(500101,"限流控制"),
-    CONTROL_DEGRADE(500201,"降级控制"),
-    CONTROL_AUTH(500301,"认证控制"),
     /*
     数据库状态码
      */
@@ -103,6 +97,17 @@ public enum BizCodeEnum {
     CODE_DATABASE_FIND_ERROR(400008,"查询失败"),
     CODE_PARAM_ERROR(400009,"参数错误"),
 
+    /**
+     * 流控操作
+     */
+    CONTROL_FLOW(500101,"限流控制"),
+    CONTROL_DEGRADE(500201,"降级控制"),
+    CONTROL_AUTH(500301,"认证控制"),
+
+    /*
+        商品库存
+     */
+    CODE_PRODUCT_STOCK_NOT_ENOUGH(500401,"商品库存不足"),
     /**
      * 文件相关
      */

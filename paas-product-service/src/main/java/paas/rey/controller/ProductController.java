@@ -1,12 +1,10 @@
 package paas.rey.controller;
-
-
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
+import paas.rey.request.LockProductRequest;
 import paas.rey.service.ProductService;
 import paas.rey.utils.JsonData;
 
@@ -47,6 +45,12 @@ public class ProductController {
         @RequestMapping("/getProductDetail/{product_id}")
         public JsonData getProductDetail(@PathVariable(value = "product_id",required = true) long productId){
             return productService.getProductDetail(productId);
+        }
+
+        @ApiOperation(value = "锁定商品订单")
+        @PostMapping("/lockProduct")
+        public JsonData lockProduct(@ApiParam(value = "锁定商品请求参数") @RequestBody LockProductRequest lockProductRequest){
+                return  productService.lockProduct(lockProductRequest);
         }
 }
 
