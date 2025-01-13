@@ -31,4 +31,5 @@ public interface CouponService extends IService<CouponDO> {
     订单锁定
      */
     JsonData newUserCoupon(NewUserRequest newUserRequest);
+
 }

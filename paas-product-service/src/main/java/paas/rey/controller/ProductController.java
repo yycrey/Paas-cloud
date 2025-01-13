@@ -8,6 +8,8 @@ import paas.rey.request.LockProductRequest;
 import paas.rey.service.ProductService;
 import paas.rey.utils.JsonData;
 
+import java.util.List;
+
 /**
  * <p>
  *  前端控制器

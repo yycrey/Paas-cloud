@@ -34,4 +34,7 @@ public interface ProductService extends IService<ProductDO> {
      * @Date: 2025/1/12
      */
     Boolean releaseStockRecord(ProductMessage productMessage);
+
+    JsonData confirmOrderCartItem(List<Long> productId);
+
 }

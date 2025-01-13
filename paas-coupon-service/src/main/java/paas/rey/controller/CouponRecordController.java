@@ -1,6 +1,4 @@
 package paas.rey.controller;
-
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -9,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import paas.rey.request.LockCouponRecordRequest;
 import paas.rey.service.CouponRecordService;
 import paas.rey.utils.JsonData;
-
 /**
  * <p>
  *  前端控制器
@@ -50,6 +47,12 @@ public class CouponRecordController {
     @PostMapping("/lockRecords")
     public JsonData lockRecords(@ApiParam("锁定优惠券请求对象") @RequestBody LockCouponRecordRequest lockCouponRecordRequest){
         return couponRecordService.lockRecords(lockCouponRecordRequest);
+    }
+
+    @ApiOperation("获取用户优惠券")
+    @GetMapping("/getCouponByUserId/{coupon_record_id}")
+    public JsonData getCouponByUserId(@PathVariable("coupon_record_id") Long couponRecordId){
+        return couponRecordService.getCouponByUserId(couponRecordId);
     }
 }
 

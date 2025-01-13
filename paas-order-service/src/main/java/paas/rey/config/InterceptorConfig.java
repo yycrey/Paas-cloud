@@ -10,8 +10,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import paas.rey.interceptor.LoginInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * @Author yeyc
  * @Description config拦截器配置

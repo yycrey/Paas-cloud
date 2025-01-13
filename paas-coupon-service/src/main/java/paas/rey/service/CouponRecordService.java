@@ -21,4 +21,6 @@ public interface CouponRecordService extends IService<CouponRecordDO> {
     JsonData lockRecords(LockCouponRecordRequest lockCouponRecordRequest);
 
     Boolean releaseCouponRecord(CouponRecordMessage couponRecordMessage);
+
+    JsonData getCouponByUserId(long couponRecordId);
 }

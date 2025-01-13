@@ -33,11 +33,12 @@ public enum BizCodeEnum {
     ACCOUNT_SUCCESS(250004,"用户登录成功"),
     ACCOUNT_RELOGIN(250005,"请重新登录"),
     ACCOUNT_UNLOGIN(250005,"未登录"),
+    ACCOUNT_NOT_EXISTS(250006,"用户不存在"),
     /*
     随机数错误枚举类
      */
     CODE_LEGTH_ERROR(270001,"随机数长度不符合规范，理应在0~9之间"),
-
+    CODE_SYSTEM_ERROR(280001,"系统异常"),
     /*
     附件上传
      */

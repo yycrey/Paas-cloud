@@ -140,7 +140,6 @@ public class CartServiceImpl implements CartService {
         getMyOperation.put(cartItemVO.getProductId(),JSON.toJSONString(cartItemVO));
     }
 
-
     /**
      * @Description: 抽取购物车通用方法
      * @Param: []
@@ -203,4 +202,25 @@ public class CartServiceImpl implements CartService {
             cartItemVO.setProductTitle(productVO.getTitle());
         });
     }
+    /**
+     * @Description: 订单服务获取商品购物单的数据
+     * @Param: [productId]
+     * @Return: paas.rey.utils.JsonData
+     * @Author: yeyc
+     * @Date: 2025/1/13
+     */
+    @Override
+public  JsonData confirmOrderCartItem(List<Long> productId) {
+        List<CartItemVO> cartItemVOS = this.buildCartItem(true);
+        List<CartItemVO> cartItemVOList = cartItemVOS.stream().filter(cartItemVO ->
+            {   //支付对应的购物项，并且支付完一个之后清空一个购物车。
+                if(productId.contains(Long.valueOf(cartItemVO.getProductId()))){
+                    this.deleteCartItem(Long.valueOf(cartItemVO.getProductId()));
+                    return true;
+                }
+                return false;
+            }).collect(Collectors.toList());
+        return JsonData.buildSuccess(cartItemVOList);
+    }
+
 }

@@ -215,4 +215,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
             return Boolean.FALSE;
         }
     }
+
+    @Override
+    public JsonData confirmOrderCartItem(List<Long> productId) {
+        return null;
+    }
 }

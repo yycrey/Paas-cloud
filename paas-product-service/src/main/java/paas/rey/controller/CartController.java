@@ -8,6 +8,8 @@ import paas.rey.request.CartItemRequest;
 import paas.rey.service.CartService;
 import paas.rey.utils.JsonData;
 
+import java.util.List;
+
 /**
  * @Author yeyc
  * @Description 购物车控制层
@@ -83,5 +85,15 @@ public class CartController {
                 cartService.changeCartItem(cartItemRequest);
                 return JsonData.buildSuccess();
         }
-        
+        /**
+         * @Description: 获取最新商品购物车信息
+         * @Param: [productId]
+         * @Return: paas.rey.utils.JsonData
+         * @Author: yeyc
+         * @Date: 2025/1/13
+         */
+        @PostMapping("/confirm_order_cart_item")
+        public JsonData confirmOrderCartItem(List<Long> productId){
+                return  cartService.confirmOrderCartItem(productId);
+        }
 }

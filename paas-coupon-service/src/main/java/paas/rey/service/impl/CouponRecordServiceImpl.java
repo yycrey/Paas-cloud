@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import paas.rey.config.RabbitMQConfig;
 import paas.rey.enums.*;
+import paas.rey.exception.BizException;
 import paas.rey.feign.ProductOrderFeignService;
 import paas.rey.interceptor.LoginInterceptor;
 import paas.rey.mapper.CouponRecordMapper;
@@ -206,5 +207,22 @@ public class CouponRecordServiceImpl extends ServiceImpl<CouponRecordMapper,Coup
             log.warn("优惠券记录释放失败,工作单的状态不是LOCK，消息{}",couponRecordMessage);
             return Boolean.FALSE;
         }
+    }
+
+    /*
+    查询用户优惠券(通用，不加条件过滤)
+    */
+    @Override
+    public JsonData getCouponByUserId(long ouponRecordId) {
+        LoginUser loginUser = LoginInterceptor.threadLocal.get();
+        //用户是否存在
+        if(ObjectUtils.isEmpty(ouponRecordId)){
+            throw new BizException(BizCodeEnum.COUPON_NO_EXITS);
+        }
+        //查询有几张优惠券
+        List<CouponRecordDO> couponRecordDOList = couponRecordMapper.selectList(new QueryWrapper<CouponRecordDO>()
+                .eq("coupon_id",ouponRecordId));
+
+        return JsonData.buildSuccess(couponRecordDOList);
     }
 }
