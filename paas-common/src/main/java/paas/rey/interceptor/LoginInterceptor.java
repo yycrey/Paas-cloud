@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * @Author yeyc
- * @Description 登录拦截器开发
+ * @Description 登录拦截器开发(RPC)
  * @Date 2024/12/28
  * @Param
  * @Exception

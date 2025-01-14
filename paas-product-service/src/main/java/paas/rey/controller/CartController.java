@@ -2,8 +2,10 @@ package paas.rey.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import paas.rey.request.CartItemLockRequest;
 import paas.rey.request.CartItemRequest;
 import paas.rey.service.CartService;
 import paas.rey.utils.JsonData;
@@ -92,8 +94,15 @@ public class CartController {
          * @Author: yeyc
          * @Date: 2025/1/13
          */
+        @ApiOperation("获取最新商品购物车信息")
         @PostMapping("/confirm_order_cart_item")
         public JsonData confirmOrderCartItem(List<Long> productId){
                 return  cartService.confirmOrderCartItem(productId);
+        }
+
+        @ApiOperation("rpc-锁定 购物车明细锁定")
+        @PostMapping("/lock_cart_item")
+        public JsonData lockCartItem(@ApiParam("锁定优惠券请求对象") @RequestBody CartItemLockRequest cartItemLockRequest){
+                return cartService.lockCartItem(cartItemLockRequest);
         }
 }

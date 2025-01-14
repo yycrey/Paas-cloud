@@ -5,6 +5,8 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,31 +28,31 @@ public class RabbitMQConfig {
     /**
      * 交换机
      */
-    @Value("${mqconfig.stock_event_exchange}")
+    @Value("${mqconfig.order_event_exchange}")
     private String eventExchange;
     /**
      * 第一个队列延迟队列，
      */
-    @Value("${mqconfig.stock_release_delay_queue}")
-    private String stockReleaseDelayQueue;
+    @Value("${mqconfig.order_release_delay_queue}")
+    private String orderReleaseDelayQueue;
     /**
      * 第一个队列的路由key
      * 进入队列的路由key
      */
-    @Value("${mqconfig.stock_release_delay_routing_key}")
-    private String stockReleaseDelayRoutingKey;
+    @Value("${mqconfig.order_release_delay_routing_key}")
+    private String orderReleaseDelayRoutingKey;
     /**
      * 第二个队列，被监听恢复库存的队列
      */
-    @Value("${mqconfig.stock_release_queue}")
-    private String stockReleaseQueue;
+    @Value("${mqconfig.order_release_queue}")
+    private String orderReleaseQueue;
     /**
      * 第二个队列的路由key
      *
      * 即进入死信队列的路由key
      */
-    @Value("${mqconfig.stock_release_routing_key}")
-    private String stockReleaseRoutingKey;
+    @Value("${mqconfig.order_release_routing_key}")
+    private String orderReleaseRoutingKey;
     /**
      * 过期时间
      */
@@ -58,17 +60,17 @@ public class RabbitMQConfig {
     private Integer ttl;
 
     /*
-        消息转换器(在有多个监听类的情况下，该转换器只能被允许注册一次)
+        消息转换器
      */
-//    @Bean
-//    public MessageConverter messageConverter() {
-//        return new Jackson2JsonMessageConverter();
-//    }
+    @Bean
+    public MessageConverter messageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
     /*
      topic创建交换机，也可以用dirct路由
      */
     @Bean
-    public Exchange stockEventChange(){
+    public Exchange orderEventChange(){
         return new TopicExchange(eventExchange,true,false);
     }
 
@@ -76,31 +78,31 @@ public class RabbitMQConfig {
      * 延迟队列
      */
     @Bean
-    public Queue stockReleaseDelayQueue(){
+    public Queue orderReleaseDelayQueue(){
         Map<String,Object> args = new HashMap<>();
         args.put("x-dead-letter-exchange",eventExchange);
-        args.put("x-dead-letter-routing-key",stockReleaseRoutingKey);
+        args.put("x-dead-letter-routing-key",orderReleaseRoutingKey);
         args.put("x-message-ttl",ttl);
-       return new Queue(stockReleaseDelayQueue,true,false,false,args);
+       return new Queue(orderReleaseDelayQueue,true,false,false,args);
     }
 
     /*
     死信队列 普通队列， 用于被监听
      */
     @Bean
-    public Queue stockReleaseQueue(){
-        return new Queue(stockReleaseQueue,true,false,false);
+    public Queue orderReleaseQueue(){
+        return new Queue(orderReleaseQueue,true,false,false);
     }
 
     /*
     死信队列绑定关系
      */
     @Bean
-    public Binding stockReleaseBinding(){
-        return new Binding(stockReleaseQueue,
+    public Binding orderReleaseBinding(){
+        return new Binding(orderReleaseQueue,
                 Binding.DestinationType.QUEUE,
                 eventExchange,
-                stockReleaseRoutingKey,
+                orderReleaseRoutingKey,
                 null);
     }
 
@@ -108,11 +110,11 @@ public class RabbitMQConfig {
     延迟队列绑定关系
      */
     @Bean
-    public Binding stockReleaseDelayBinding(){
-        return new Binding(stockReleaseDelayQueue,
+    public Binding orderReleaseDelayBinding(){
+        return new Binding(orderReleaseDelayQueue,
                 Binding.DestinationType.QUEUE,
                 eventExchange,
-                stockReleaseDelayRoutingKey,
+                orderReleaseDelayRoutingKey,
                 null);
     }
 }

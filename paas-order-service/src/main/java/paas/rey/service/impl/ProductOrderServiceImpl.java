@@ -4,13 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import paas.rey.enums.BizCodeEnum;
-import paas.rey.enums.CouponStateEnum;
-import paas.rey.enums.ProductOrderStateEnum;
-import paas.rey.enums.ProductOrderTypeEnum;
+import paas.rey.config.RabbitMQConfig;
+import paas.rey.enums.*;
 import paas.rey.exception.BizException;
 import paas.rey.feign.AddressFeignService;
 import paas.rey.feign.CouponFeignService;
@@ -18,13 +18,11 @@ import paas.rey.feign.ProductFeignService;
 import paas.rey.interceptor.LoginInterceptor;
 import paas.rey.mapper.ProductOrderItemMapper;
 import paas.rey.model.LoginUser;
+import paas.rey.model.ProductMessage;
 import paas.rey.model.ProductOrderDO;
 import paas.rey.mapper.ProductOrderMapper;
 import paas.rey.model.ProductOrderItemDO;
-import paas.rey.request.ConfirmOrderRequest;
-import paas.rey.request.LockCouponRecordRequest;
-import paas.rey.request.LockProductRequest;
-import paas.rey.request.OrderItemRequest;
+import paas.rey.request.*;
 import paas.rey.service.ProductOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
@@ -33,10 +31,12 @@ import paas.rey.utils.JsonData;
 import paas.rey.vo.CouponRecordVO;
 import paas.rey.vo.OrderItemVO;
 import paas.rey.vo.ProductOrderAddressVO;
+import springfox.documentation.spring.web.json.Json;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,6 +61,10 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     private CouponFeignService couponFeignService;
     @Autowired
     private ProductOrderItemMapper productOrderItemMapper;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitMQConfig rabbitMQConfig;
 
     @Transactional
     @Override
@@ -75,25 +79,57 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
 
         //获取购物车信息
         JsonData jsonData = productFeignService.confirmOrderCartItem(confirmOrderRequest.getProductIds());
-        //获取所有购物车信息
+        //购物车商品信息
         List<OrderItemVO> orderItemVOList = jsonData.getData(new TypeReference<List<OrderItemVO>>(){});
         if(orderItemVOList==null){
             throw new BizException("购物车数据为空");
         }
+
+        //作业：
+        //锁定购物车商品数据
+        //1.在product中新建一个购物车的表 cart_task
+        //2.插入task记录，同时把数据发送到MQ
+        this.lockSendMq(orderItemVOList,orderTradeNo);
         //商品验价
         this.checkPrice(orderItemVOList,confirmOrderRequest);
         //锁定优惠券
         this.lockCouponRecord(confirmOrderRequest,orderTradeNo);
         //锁定库存
-         this.lockProductStocks(orderItemVOList,orderTradeNo);
+        this.lockProductStocks(orderItemVOList,orderTradeNo);
         //创建订单
         ProductOrderDO productOrderDo = this.saveOrder(confirmOrderRequest,loginUser,orderTradeNo,productOrderAddressVO);
         //创建订单项
         this.saveProductOrderItem(orderItemVOList,orderTradeNo,productOrderDo.getId());
-        //发送延迟消息 自动关单 TODO...
+
+        ProductMessage productMessage = new ProductMessage();
+        productMessage.setTaskId(productOrderDo.getId());
+        productMessage.setOutTradeNo(productOrderDo.getOutTradeNo());
+        //发送延迟消息 自动关单
+        rabbitTemplate.convertAndSend(rabbitMQConfig.getEventExchange(),rabbitMQConfig.getOrderReleaseDelayRoutingKey(),productMessage);
+
+        //消息支付 TODO...
+
 
         return null;
 
+    }
+
+    //作业：
+    //锁定购物车商品数据
+    //1.在product中新建一个购物车的表 cart_task
+    //2.插入task记录，同时把数据发送到MQ
+    private void lockSendMq(List<OrderItemVO> orderItemVOList, String orderTradeNo) {
+        CartItemLockRequest cartItemLockRequest = new CartItemLockRequest();
+        for(OrderItemVO orderItemVO:orderItemVOList){
+            //
+
+            //数据封装
+            HashMap<String, Integer> longIntegerHashMap = new HashMap<>(64);
+            longIntegerHashMap.put(orderItemVO.getProductId(),orderItemVO.getBuyNum());
+            cartItemLockRequest.setCartItemMap(longIntegerHashMap);
+        }
+        cartItemLockRequest.setOrderOutTraceNo(orderTradeNo);
+        JsonData jsonData = productFeignService.lockCartItem(cartItemLockRequest);
     }
 
     /*
@@ -278,6 +314,50 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
 
         //返回订单状态
         return JsonData.buildSuccess(productOrderDO.getState());
+    }
+
+    /**
+     * @Description: 订单关单延迟队列消息监听
+     * @Param: [productMessage]
+     * @Return: java.lang.Boolean
+     * @Author: yeyc
+     * @Date: 2025/1/14
+     */
+    @Override
+    public Boolean closeProductOrder(ProductMessage productMessage) {
+        log.info("订单关闭消息{}",productMessage);
+        if(null == productMessage){
+            log.info("消息确认订单关系消息为空{}",productMessage);
+            return true;
+        }
+
+       ProductOrderDO productOrder = productOrderMapper.selectOne(new QueryWrapper<ProductOrderDO>()
+                .eq("out_trade_no",productMessage.getOutTradeNo()));
+       //订单不存在
+       if(null == productOrder){
+           log.warn("消息确认，未找到订单");
+           return true;
+       }
+       //订单状态为关闭
+       if(productOrder.getState().equalsIgnoreCase(ProductOrderStateEnum.PAY.name())){
+           //订单已经支付
+           log.warn("订单已经支付，无需关闭");
+           return true;
+       }
+       //查询第三方接口 是否为支付
+        String payResult = "";
+        if(StringUtils.isBlank(payResult)){
+            //结果为空 说明未支付，则进行关单处理
+            productOrderMapper.updateOrderState(Long.parseLong(productMessage.getOutTradeNo())
+                    ,ProductOrderStateEnum.CANCEL.name(),ProductOrderStateEnum.NEW.name());
+            return true;
+        }else{
+            //支付成功，主动把订单改成已经支付，造成该原因情况可能是支付通道回调有问题
+            log.warn("支付成功，主动把订单改成已经支付，造成该原因情况可能是支付通道回调有问题{}",productMessage);
+            productOrderMapper.updateOrderState(Long.parseLong(productMessage.getOutTradeNo())
+                    ,ProductOrderStateEnum.PAY.name(),ProductOrderStateEnum.NEW.name());
+            return true;
+        }
     }
 
     /**

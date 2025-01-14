@@ -3,15 +3,24 @@ package paas.rey.service.impl;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import paas.rey.config.CartItemRabbitMQConfig;
 import paas.rey.constant.CacheKey;
 import paas.rey.enums.BizCodeEnum;
+import paas.rey.enums.StockTaskEnum;
 import paas.rey.exception.BizException;
+import paas.rey.feign.ProductOrderFeignService;
 import paas.rey.interceptor.LoginInterceptor;
+import paas.rey.mapper.CartitemTaskMapper;
+import paas.rey.mapper.ProductMapper;
+import paas.rey.model.CartItemMessage;
+import paas.rey.model.CartitemTaskDO;
 import paas.rey.model.LoginUser;
+import paas.rey.request.CartItemLockRequest;
 import paas.rey.request.CartItemRequest;
 import paas.rey.service.CartService;
 import paas.rey.service.ProductService;
@@ -20,6 +29,7 @@ import paas.rey.vo.CartItemVO;
 import paas.rey.vo.CartVO;
 import paas.rey.vo.ProductVO;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -37,10 +47,18 @@ import java.util.stream.Collectors;
 public class CartServiceImpl implements CartService {
     @Autowired
     private ProductService productService;
-
     @Autowired
     private RedisTemplate redisTemplate;
-
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private CartItemRabbitMQConfig cartItemRabbitMQConfig;
+    @Autowired
+    private ProductOrderFeignService productOrderFeignService;
+    @Autowired
+    private CartitemTaskMapper cartitemTaskMapper;
+    @Autowired
+    private ProductMapper productMapper;
     /**
      * @Description: 添加商品
      * @Param: [cartItemRequest]
@@ -72,7 +90,6 @@ public class CartServiceImpl implements CartService {
             cartItemVO.setAmount(productvo.getAmount());
             //添加到redis
             myOperation.put(cartItemVO.getProductId(), JSON.toJSONString(cartItemVO));
-
         }else{
             //存在商品则修改数量
             CartItemVO cartItemVO = JSON.parseObject(result, CartItemVO.class);
@@ -223,4 +240,52 @@ public  JsonData confirmOrderCartItem(List<Long> productId) {
         return JsonData.buildSuccess(cartItemVOList);
     }
 
+    //锁定购物车单据
+    @Override
+    public JsonData lockCartItem(CartItemLockRequest cartItemlockRequest) {
+        if(null == cartItemlockRequest){
+            throw new BizException(BizCodeEnum.ORDER_CONFIRM_CART_ITEM_NOT_EXIST);
+        }
+        LoginUser loginUser = LoginInterceptor.threadLocal.get();
+        Map<String, Integer> cartItemMap = cartItemlockRequest.getCartItemMap();
+        for(Map.Entry<String, Integer> entry : cartItemMap.entrySet()){
+            CartitemTaskDO cartitemTaskDO = new CartitemTaskDO();
+            cartitemTaskDO.setOutTradeNo(cartItemlockRequest.getOrderOutTraceNo());
+            cartitemTaskDO.setCreateTime(new Date());
+            cartitemTaskDO.setProductId(Long.valueOf(entry.getKey()));
+            cartitemTaskDO.setBuyNum(entry.getValue());
+            cartitemTaskDO.setIuserId(loginUser.getId());
+            cartitemTaskDO.setLockState(StockTaskEnum.LOCK.name());
+            cartitemTaskMapper.insert(cartitemTaskDO);
+            log.info("插入锁定购物车记录表");
+
+            rabbitTemplate.convertAndSend(cartItemRabbitMQConfig.getEventExchange()
+                    ,cartItemRabbitMQConfig.getCartItemReleaseDelayRoutingKey(),cartitemTaskDO);
+            log.info("锁定购物车清空消息插入成功");
+        }
+        return JsonData.buildSuccess();
+    }
+
+    //监听购物车清空消息队列
+    @Override
+    public Boolean releaseCartItem(CartItemMessage cartItemMessage) {
+        LoginUser loginUser = LoginInterceptor.threadLocal.get();
+        //查看商品订单是否存在
+        JsonData jsonData = productOrderFeignService.queryProductOrderState(cartItemMessage.getOutTradeNo());
+        if(jsonData.getCode()==0){
+            if(jsonData.getData()!=null){
+                //存在，则忽略task
+                log.info("商品订单存在，task记录改成忽略");
+                cartitemTaskMapper.updateState(cartItemMessage.getProductId(),StockTaskEnum.IGNORE.name(),loginUser.getId());
+                return Boolean.TRUE;
+            }else{
+                //不存在则恢复商品库存购买的数据
+                productMapper.updateRecover(cartItemMessage.getProductId(),cartItemMessage.getBuyNum());
+                return Boolean.TRUE;
+            }
+        }{
+            log.error("商品订单接口返回错误{}",cartItemMessage);
+            return Boolean.FALSE;
+        }
+    }
 }

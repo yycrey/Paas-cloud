@@ -183,7 +183,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
                         .eq("id",productMessage.getTaskId()));
         if(null == productTaskDO){
             log.info("商品库存释放失败，消息{}",productMessage);
-            return false;
+            return Boolean.FALSE;
         }
         //判断商品锁定状态是否是LOCK
         if(productTaskDO.getLockState().equals(StockTaskEnum.LOCK.name())){
@@ -192,14 +192,14 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
                     String state = jsonData.getData().toString();
                     if(state.equalsIgnoreCase(ProductOrderStateEnum.NEW.name())){
                         log.warn("订单状态是NEW，返回给消息队列，重新入队，重新投递{}",productMessage);
-                        return false;
+                        return Boolean.FALSE;
                     }
                     if(state.equalsIgnoreCase(ProductOrderStateEnum.PAY.name())){
                         //更新状态为FINISH
                         productTaskDO.setLockState(StockTaskEnum.FINISH.name());
                         productTaskMapper.update(productTaskDO,new QueryWrapper<ProductTaskDO>().eq("id",productMessage.getTaskId()));
                         log.info("订单已支付，修改库存锁定工单的状态为FINISH，消息{}",productMessage);
-                        return true;
+                        return Boolean.TRUE;
                     }
                 }
                 //如果订单不存在

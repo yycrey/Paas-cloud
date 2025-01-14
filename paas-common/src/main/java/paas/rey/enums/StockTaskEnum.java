@@ -1,8 +1,5 @@
 package paas.rey.enums;
 
-import lombok.Data;
-import lombok.Getter;
-
 /**
  * @Author yeyc
  * @Description 描述类的作用
@@ -22,5 +19,10 @@ public enum StockTaskEnum {
     /*
     释放
      */
-    CANCEL;
+    CANCEL,
+
+    /*
+    忽略
+     */
+    IGNORE
 }

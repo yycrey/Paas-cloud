@@ -1,5 +1,6 @@
 package paas.rey.service;
 
+import paas.rey.model.ProductMessage;
 import paas.rey.model.ProductOrderDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import paas.rey.request.ConfirmOrderRequest;
@@ -18,4 +19,6 @@ public interface ProductOrderService extends IService<ProductOrderDO> {
     JsonData comfirmOrder(ConfirmOrderRequest confirmOrderRequest);
 
     JsonData queryProductOrderState(String outTradeNo);
+
+    Boolean closeProductOrder(ProductMessage productMessage);
 }

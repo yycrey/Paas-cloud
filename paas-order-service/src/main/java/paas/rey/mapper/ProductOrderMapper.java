@@ -12,5 +12,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2025-01-06
  */
 public interface ProductOrderMapper extends BaseMapper<ProductOrderDO> {
-
+    int updateOrderState(long orderTradeNo,String state,String oldState);
 }

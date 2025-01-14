@@ -32,6 +32,7 @@ public class ConfirmOrderRequest {
         @ApiModelProperty(value = "客户端类型")
         @JsonProperty("client_type")
         private String clientType;
+
         @ApiModelProperty(value = "地址id")
         @JsonProperty("address_id")
         private long addressId;

@@ -1,5 +1,7 @@
 package paas.rey.service;
 
+import paas.rey.model.CartItemMessage;
+import paas.rey.request.CartItemLockRequest;
 import paas.rey.request.CartItemRequest;
 import paas.rey.utils.JsonData;
 
@@ -17,5 +19,9 @@ public interface CartService {
     void changeCartItem(CartItemRequest cartItemRequest);
 
     JsonData confirmOrderCartItem(List<Long> productId);
+
+    JsonData lockCartItem(CartItemLockRequest cartItemLockRequest);
+
+    Boolean releaseCartItem(CartItemMessage cartItemMessage);
 
 }
