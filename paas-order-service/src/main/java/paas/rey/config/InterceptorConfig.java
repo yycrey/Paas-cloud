@@ -31,7 +31,10 @@ public class InterceptorConfig implements WebMvcConfigurer {
             //放行路径
             .excludePathPatterns("/api/productOrderDO/*/query_state")
     //放行路径
-            .excludePathPatterns("/api/productOrderDO/*/test_pay");
+            .excludePathPatterns("/api/productOrderDO/*/test_pay")
+            .excludePathPatterns(" /api/callback/v1/*/*");
+
+
   }
   
   /**

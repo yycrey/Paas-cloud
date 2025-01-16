@@ -2,6 +2,8 @@ package paas.rey.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.internal.util.AlipaySignature;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +11,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import paas.rey.config.AliPayConfig;
 import paas.rey.config.RabbitMQConfig;
 import paas.rey.enums.*;
 import paas.rey.exception.BizException;
@@ -33,11 +36,10 @@ import paas.rey.vo.OrderItemVO;
 import paas.rey.vo.ProductOrderAddressVO;
 import springfox.documentation.spring.web.json.Json;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -358,6 +360,19 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
                     ,ProductOrderStateEnum.PAY.name(),ProductOrderStateEnum.NEW.name());
             return true;
         }
+    }
+    /**
+     * @Description: 支付宝支付
+     * @Param: [response, request]
+     * @Return: java.lang.String
+     * @Author: yeyc
+     * @Date: 2025/1/12
+     */
+    @Override
+    public String aliPay(HttpServletResponse response, HttpServletRequest request) throws AlipayApiException {
+        //将一步通知中收到的所有参数存储到map中
+        Map<String, String> paramsMap = convertRequestParamsToMap(request);
+        return null;
     }
 
     /**
