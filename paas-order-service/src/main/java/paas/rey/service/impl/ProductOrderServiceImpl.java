@@ -2,8 +2,6 @@ package paas.rey.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.alipay.api.AlipayApiException;
-import com.alipay.api.internal.util.AlipaySignature;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -11,8 +9,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import paas.rey.config.AliPayConfig;
+import paas.rey.compontent.PayFactory;
 import paas.rey.config.RabbitMQConfig;
+import paas.rey.constant.TimeConstant;
 import paas.rey.enums.*;
 import paas.rey.exception.BizException;
 import paas.rey.feign.AddressFeignService;
@@ -33,11 +32,8 @@ import paas.rey.utils.CommonUtil;
 import paas.rey.utils.JsonData;
 import paas.rey.vo.CouponRecordVO;
 import paas.rey.vo.OrderItemVO;
+import paas.rey.vo.PayInfoVO;
 import paas.rey.vo.ProductOrderAddressVO;
-import springfox.documentation.spring.web.json.Json;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,6 +63,8 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     private RabbitTemplate rabbitTemplate;
     @Autowired
     private RabbitMQConfig rabbitMQConfig;
+    @Autowired
+    private PayFactory payFactory;
 
     @Transactional
     @Override
@@ -109,11 +107,20 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
         //发送延迟消息 自动关单
         rabbitTemplate.convertAndSend(rabbitMQConfig.getEventExchange(),rabbitMQConfig.getOrderReleaseDelayRoutingKey(),productMessage);
 
-        //消息支付 TODO...
-
-
-        return null;
-
+        //创建支付
+        PayInfoVO payInfoVO = new PayInfoVO(productOrderDo.getOutTradeNo()
+                ,productOrderDo.getPayAmount()
+                ,confirmOrderRequest.getPayType()
+                ,confirmOrderRequest.getClientType()
+                ,"orderOutTradeNo", TimeConstant.ORDER_PAY_TIMEOUT_MILLS);
+        String payResult = payFactory.pay(payInfoVO);
+        if(StringUtils.isNotBlank(payResult)){
+            log.info("创建支付订单成功，支付结果：{}",payResult);
+            return JsonData.buildSuccess(payResult);
+        }else{
+            log.error("创建支付订单失败,支付结果{}",payResult);
+            return JsonData.buildError(BizCodeEnum.PAY_ORDER_FAIL);
+        }
     }
 
     //作业：
@@ -123,7 +130,6 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     private void lockSendMq(List<OrderItemVO> orderItemVOList, String orderTradeNo) {
         CartItemLockRequest cartItemLockRequest = new CartItemLockRequest();
         for(OrderItemVO orderItemVO:orderItemVOList){
-            //
 
             //数据封装
             HashMap<String, Integer> longIntegerHashMap = new HashMap<>(64);
@@ -319,7 +325,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     }
 
     /**
-     * @Description: 订单关单延迟队列消息监听
+     * @Description: 订单关单延迟队列消息监听(定时关单)
      * @Param: [productMessage]
      * @Return: java.lang.Boolean
      * @Author: yeyc
@@ -346,8 +352,11 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
            log.warn("订单已经支付，无需关闭");
            return true;
        }
-       //查询第三方接口 是否为支付
-        String payResult = "";
+       //查询第三方接口 支付是否成功
+        PayInfoVO payInfoVO = new PayInfoVO();
+        payInfoVO.setPayType(productOrder.getPayType());
+        payInfoVO.setOutTradeNo(productOrder.getOutTradeNo());
+        String payResult = payFactory.queryPaySuccess(payInfoVO);
         if(StringUtils.isBlank(payResult)){
             //结果为空 说明未支付，则进行关单处理
             productOrderMapper.updateOrderState(Long.parseLong(productMessage.getOutTradeNo())
@@ -361,6 +370,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
             return true;
         }
     }
+
     /**
      * @Description: 支付宝支付
      * @Param: [response, request]
@@ -369,10 +379,23 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
      * @Date: 2025/1/12
      */
     @Override
-    public String aliPay(HttpServletResponse response, HttpServletRequest request) throws AlipayApiException {
-        //将一步通知中收到的所有参数存储到map中
-        Map<String, String> paramsMap = convertRequestParamsToMap(request);
-        return null;
+    public JsonData handlerOrderCallbackMsg(ProductOrderPayTypeEnum payTypeEnum, Map<String,String> paramsMap) {
+        if(payTypeEnum.name().equalsIgnoreCase(ProductOrderPayTypeEnum.ALIPAY.name())){
+            //订单商户号
+            String outTradeOutNo = paramsMap.get("out_trade_no");
+            //交易的状态
+            String tradeStatus = paramsMap.get("trade_status");
+            if(tradeStatus.equalsIgnoreCase("TRADE_SUCCESS")
+                    || tradeStatus.equalsIgnoreCase("TRADE_FINISHED")){
+                    //更新订单状态
+                productOrderMapper.updateOrderState(Long.parseLong(outTradeOutNo),ProductOrderStateEnum.PAY.name(),ProductOrderStateEnum.NEW.name());
+                return JsonData.buildSuccess();
+            }
+            //微信支付 TODO ,,,
+        }else if(payTypeEnum.name().equalsIgnoreCase(ProductOrderPayTypeEnum.WECHAT.name())){
+
+        }
+        return JsonData.buildResult(BizCodeEnum.PAY_ORDER_CALLBACK_SIGN_FAIL);
     }
 
     /**

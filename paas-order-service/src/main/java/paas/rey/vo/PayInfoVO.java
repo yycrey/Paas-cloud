@@ -15,7 +15,6 @@ import java.math.BigDecimal;
  **/
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class PayInfoVO {
 
         //支付订单号
@@ -33,4 +32,8 @@ public class PayInfoVO {
         //超时时间
         private long orderPaytimeout;
 
+        public PayInfoVO(String outTradeNo, BigDecimal payAmount, String payType, String clientType, String orderOutTradeNo, long orderPaytimeout) {
+        }
+        public PayInfoVO() {
+        }
 }

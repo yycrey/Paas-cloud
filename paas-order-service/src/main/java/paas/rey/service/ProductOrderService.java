@@ -1,14 +1,12 @@
 package paas.rey.service;
 
-import com.alipay.api.AlipayApiException;
+import paas.rey.enums.ProductOrderPayTypeEnum;
 import paas.rey.model.ProductMessage;
 import paas.rey.model.ProductOrderDO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import paas.rey.request.ConfirmOrderRequest;
 import paas.rey.utils.JsonData;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * <p>
@@ -26,7 +24,5 @@ public interface ProductOrderService extends IService<ProductOrderDO> {
 
     Boolean closeProductOrder(ProductMessage productMessage);
 
-    String aliPay(HttpServletResponse response, HttpServletRequest request) throws AlipayApiException;
-
-    JsonData handlerOrderCallbackMsg(HttpServletResponse response, HttpServletRequest request);
+    JsonData handlerOrderCallbackMsg(ProductOrderPayTypeEnum payTypeEnum, Map<String,String> paramsMap);
 }

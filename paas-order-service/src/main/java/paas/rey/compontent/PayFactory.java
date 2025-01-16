@@ -25,7 +25,7 @@ public class PayFactory {
          * @Author: yeyc
          * @Date: 2025/1/16
          */
-        String pay(PayInfoVO PayInfoVO){
+        public String pay(PayInfoVO PayInfoVO){
             String payType = PayInfoVO.getPayType();
             if(ProductOrderPayTypeEnum.ALIPAY.name().equalsIgnoreCase(payType)){
                return  new PayStrategyContext(alipayStrategy).unifiedoroder(PayInfoVO);
@@ -45,7 +45,7 @@ public class PayFactory {
          * @Author: yeyc
          * @Date: 2025/1/16
          */
-        String queryPaySuccess(PayInfoVO PayInfoVO){
+        public String queryPaySuccess(PayInfoVO PayInfoVO){
             String payType = PayInfoVO.getPayType();
             if(ProductOrderPayTypeEnum.ALIPAY.name().equalsIgnoreCase(payType)){
                 return  new PayStrategyContext(alipayStrategy).queryPaySuccess(PayInfoVO);

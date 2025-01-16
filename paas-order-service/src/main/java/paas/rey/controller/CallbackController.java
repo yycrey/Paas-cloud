@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import paas.rey.config.AliPayConfig;
+import paas.rey.enums.ProductOrderPayTypeEnum;
 import paas.rey.service.ProductOrderService;
 import paas.rey.utils.JsonData;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class CallbackController {
         try{
             boolean signVerified = AlipaySignature.rsaCheckV1(paramsMap, AliPayConfig.APP_ALIPAY_PUB_ID, AliPayConfig.APP_PRI_ID, AliPayConfig.CHARSET);
             if(signVerified){
-                   JsonData jsonData =  productOrderService.handlerOrderCallbackMsg(response,request);
+                   JsonData jsonData =  productOrderService.handlerOrderCallbackMsg(ProductOrderPayTypeEnum.ALIPAY,paramsMap);
                    if(jsonData.getCode() == 0){
                        //通知结果确认成功，不然一直会通知，八次都没返回success就认为交易失败
                        return "success";
