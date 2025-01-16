@@ -1,11 +1,18 @@
 package paas.rey.controller;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.response.AlipayTradeWapPayResponse;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import paas.rey.compontent.PayFactory;
+import paas.rey.config.AliPayConfig;
+import paas.rey.config.PayUrlConfig;
 import paas.rey.enums.ClientTypeEnum;
 import paas.rey.enums.ProductOrderPayTypeEnum;
 import paas.rey.feign.AddressFeignService;
@@ -14,6 +21,8 @@ import paas.rey.service.ProductOrderService;
 import paas.rey.utils.JsonData;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * <p>
@@ -31,6 +40,10 @@ public class ProductOrderController {
         private ProductOrderService productOrderService;
         @Autowired
         private AddressFeignService addressFeignService;
+        @Autowired
+        private PayUrlConfig payUrlConfig;
+        @Autowired
+        private PayFactory payFactory;
 
         @GetMapping("query_state")
         public JsonData queryProductOrderState(@RequestParam("out_trade_no")String outTradeNo){
@@ -88,6 +101,54 @@ public class ProductOrderController {
                 response.getWriter().close();
             }catch (IOException e){
                 log.error("响应数据失败{}",e.getMessage());
+            }
+        }
+        /**
+         * @Description: 支付宝支付
+         * @Param: [httpServletRequest]
+         * @Return: void
+         * @Author: yeyc
+         * @Date: 2025/1/16
+         */
+        @GetMapping("test_pay")
+        public void testPay(HttpServletResponse response) throws AlipayApiException {
+            HashMap<Object, Object> objectObjectHashMap = new HashMap<>();
+            //商户订单号,64个字符以内、可包含字母、数字、下划线；需保证在商户端不重复
+            String no = UUID.randomUUID().toString();
+            log.info("订单号:{}",no);
+            objectObjectHashMap.put("out_trade_no", no);
+            objectObjectHashMap.put("product_code", "FAST_INSTANT_TRADE_PAY");
+            //订单总金额，单位为元，精确到小数点后两位
+            objectObjectHashMap.put("total_amount", "111.99");
+            //商品标题/交易标题/订单标题/订单关键字等。 注意：不可使用特殊字符，如 /，=，&amp; 等。
+            objectObjectHashMap.put("subject", "杯子");
+            //商品描述，可空
+            objectObjectHashMap.put("body", "好的杯子");
+            // 该笔订单允许的最晚付款时间，逾期将关闭交易。取值范围：1m～15d。m-分钟，h-小时，d-天，1c-当天（1c-当天的情况下，无论交易何时创建，都在0点关闭）。 该参数数值不接受小数点， 如 1.5h，可转换为 90m。
+            objectObjectHashMap.put("timeout_express", "5m");
+
+            AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest();
+            request.setBizContent(JSON.toJSONString(objectObjectHashMap));
+            request.setNotifyUrl(payUrlConfig.getSuccessReturnUrl());
+            request.setReturnUrl(payUrlConfig.getCallbackUrl());
+            try {
+                AlipayTradeWapPayResponse aliPayResponse = AliPayConfig.getInstance().pageExecute(request);
+                log.info("支付宝响应参数{}",aliPayResponse);
+                if(aliPayResponse.isSuccess()){
+                    System.out.println("调用成功");
+                    String form = aliPayResponse.getBody();
+                    System.out.println("调用成功form:"+form);
+                    response.setContentType("text/html;charset=UTF-8");
+                    response.getWriter().write(form);
+                    response.getWriter().flush();
+                    response.getWriter().close();
+                }else{
+                    log.info("调用失败");
+                }
+            } catch (AlipayApiException e) {
+                throw new AlipayApiException();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 }
