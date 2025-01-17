@@ -18,6 +18,7 @@ import paas.rey.enums.ProductOrderPayTypeEnum;
 import paas.rey.feign.AddressFeignService;
 import paas.rey.request.ConfirmOrderRequest;
 import paas.rey.service.ProductOrderService;
+import paas.rey.utils.CommonUtil;
 import paas.rey.utils.JsonData;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -71,7 +72,7 @@ public class ProductOrderController {
          */
         @ApiOperation(value = "提交订单")
         @PostMapping("confirmOrder")
-        public void comfirmOrder(@ApiParam(value = "提交订单请求参数") @RequestBody ConfirmOrderRequest confirmOrderRequest){
+        public void comfirmOrder(@ApiParam(value = "提交订单请求参数") @RequestBody ConfirmOrderRequest confirmOrderRequest,HttpServletResponse response){
               JsonData jsonData = productOrderService.comfirmOrder(confirmOrderRequest);
               if(jsonData.getCode() == 0){
                     //支付来源
@@ -83,11 +84,12 @@ public class ProductOrderController {
 
                         //TODO... 支付类型
                         if (ClientTypeEnum.H5.name().equals(client)){
-
+                            writeData(response,jsonData);
                         }
                     }
               }else{
                   log.error("创建订单失败{}", jsonData);
+                  CommonUtil.sendJsonMessage(response,jsonData);
               }
         }
         /*

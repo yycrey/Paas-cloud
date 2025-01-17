@@ -16,7 +16,7 @@ import paas.rey.utils.JsonData;
  * @Author: yeyc
  * @Date: 2025/1/13
  */
-@FeignClient("paas-order-service")
+@FeignClient("paas-coupon-service")
 public interface CouponFeignService {
     //获取优惠券/getCouponRecordDetail/{id}
     @GetMapping("/api/couponRecord/v1/getCouponRecordDetail/{id}")

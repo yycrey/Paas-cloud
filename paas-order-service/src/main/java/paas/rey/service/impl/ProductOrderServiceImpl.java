@@ -80,11 +80,12 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
         //获取购物车信息
         JsonData jsonData = productFeignService.confirmOrderCartItem(confirmOrderRequest.getProductIds());
         //购物车商品信息
-        List<OrderItemVO> orderItemVOList = jsonData.getData(new TypeReference<List<OrderItemVO>>(){});
-        if(orderItemVOList==null){
+        log.info("购物车商品信息：{}",jsonData);
+        List<OrderItemVO> orderItemVOList = jsonData.getData(new TypeReference<>() {
+        });
+        if(orderItemVOList==null && orderItemVOList.size()==0){
             throw new BizException("购物车数据为空");
         }
-
         //作业：
         //锁定购物车商品数据
         //1.在product中新建一个购物车的表 cart_task
@@ -153,7 +154,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
             productOrderItemDO.setProductImg(obj.getProductImg());
             productOrderItemDO.setBuyNum(obj.getBuyNum());
             productOrderItemDO.setTotalAmount(obj.getTotalAmount());
-            productOrderItemDO.setAmount(obj.getAmount());
+            productOrderItemDO.setAmount(obj.getProductPrice());
             productOrderItemDO.setCreateTime(new Date());
             return productOrderItemDO;
         }).collect(Collectors.toList());
@@ -188,7 +189,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
         productOrderDO.setTotalAmount(confirmOrderRequest.getTotalAmount());
         productOrderDO.setState(ProductOrderStateEnum.NEW.name());
         ProductOrderTypeEnum.valueOf(confirmOrderRequest.getClientType());
-        productOrderDO.setPayType(ProductOrderTypeEnum.valueOf(confirmOrderRequest.getPayType()).name());
+        productOrderDO.setPayType(ProductOrderStateEnum.valueOf(confirmOrderRequest.getPayType()).name());
         productOrderDO.setReceiverAddress(JSON.toJSONString(productOrderAddressVO));
 
         productOrderMapper.insert(productOrderDO);
@@ -249,19 +250,21 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
                 realPayAmount = realPayAmount.add(totalAmount);
             }
             //获取优惠券
-            CouponRecordVO couponRecordVO = this.getCoupon(confirmOrderRequest.getCouponRecordId());
-            //计算价格是否满足优惠券满减条件
-            if(couponRecordVO!=null){
-                //如果不满足满减
-                if(realPayAmount.compareTo(couponRecordVO.getConditionPrice())< 0){
-                    throw new BizException(BizCodeEnum.ORDER_CONFIRM_COUPON_FAIL);
-                }
-                //支付总价比优惠券价格小
-                if(couponRecordVO.getPrice().compareTo(realPayAmount)>0){
-                    realPayAmount = BigDecimal.ZERO;
-                }else{
-                    //大于优惠券价格则减去优惠券价格
-                    realPayAmount = realPayAmount.subtract(couponRecordVO.getPrice());
+            if(confirmOrderRequest.getCouponRecordId()>0){
+                CouponRecordVO couponRecordVO = this.getCoupon(confirmOrderRequest.getCouponRecordId());
+                //计算价格是否满足优惠券满减条件
+                if(couponRecordVO!=null){
+                    //如果不满足满减
+                    if(realPayAmount.compareTo(couponRecordVO.getConditionPrice())< 0){
+                        throw new BizException(BizCodeEnum.ORDER_CONFIRM_COUPON_FAIL);
+                    }
+                    //支付总价比优惠券价格小
+                    if(couponRecordVO.getPrice().compareTo(realPayAmount)>0){
+                        realPayAmount = BigDecimal.ZERO;
+                    }else{
+                        //大于优惠券价格则减去优惠券价格
+                        realPayAmount = realPayAmount.subtract(couponRecordVO.getPrice());
+                    }
                 }
             }
             if(realPayAmount.compareTo(confirmOrderRequest.getRealPayAmount())!=0){
@@ -277,13 +280,13 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
             return null;
         }
         JsonData jsonData = couponFeignService.getCouponRecordDetail(coupon_record_id);
-        if(jsonData.getCode()!=0){
+        if(jsonData.getCode() != 400007){
             throw new BizException("获取优惠券失败");
         }
         CouponRecordVO couponRecordVO = jsonData.getData(new TypeReference<CouponRecordVO>(){});
-        if(!this.couponAvaliable(couponRecordVO)){
+        if(this.couponAvaliable(couponRecordVO)){
             log.info(BizCodeEnum.COUPON_UNAVAILABLE.name());
-            throw new BizException(BizCodeEnum.COUPON_UNAVAILABLE);
+//            throw new BizException(BizCodeEnum.COUPON_UNAVAILABLE);
         }
         return couponRecordVO;
     }
@@ -359,13 +362,13 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
         String payResult = payFactory.queryPaySuccess(payInfoVO);
         if(StringUtils.isBlank(payResult)){
             //结果为空 说明未支付，则进行关单处理
-            productOrderMapper.updateOrderState(Long.parseLong(productMessage.getOutTradeNo())
+            productOrderMapper.updateOrderState(productMessage.getOutTradeNo()
                     ,ProductOrderStateEnum.CANCEL.name(),ProductOrderStateEnum.NEW.name());
             return true;
         }else{
             //支付成功，主动把订单改成已经支付，造成该原因情况可能是支付通道回调有问题
             log.warn("支付成功，主动把订单改成已经支付，造成该原因情况可能是支付通道回调有问题{}",productMessage);
-            productOrderMapper.updateOrderState(Long.parseLong(productMessage.getOutTradeNo())
+            productOrderMapper.updateOrderState(productMessage.getOutTradeNo()
                     ,ProductOrderStateEnum.PAY.name(),ProductOrderStateEnum.NEW.name());
             return true;
         }
@@ -388,7 +391,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
             if(tradeStatus.equalsIgnoreCase("TRADE_SUCCESS")
                     || tradeStatus.equalsIgnoreCase("TRADE_FINISHED")){
                     //更新订单状态
-                productOrderMapper.updateOrderState(Long.parseLong(outTradeOutNo),ProductOrderStateEnum.PAY.name(),ProductOrderStateEnum.NEW.name());
+                productOrderMapper.updateOrderState(outTradeOutNo,ProductOrderStateEnum.PAY.name(),ProductOrderStateEnum.NEW.name());
                 return JsonData.buildSuccess();
             }
             //微信支付 TODO ,,,

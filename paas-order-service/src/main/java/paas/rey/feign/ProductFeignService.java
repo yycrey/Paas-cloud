@@ -29,10 +29,9 @@ public interface ProductFeignService {
      * @Author: yeyc
      * @Date: 2025/1/13
      */
-    @PostMapping("/api/product/v1/lock_stock")
+    @PostMapping("/api/product/v1/lockProduct")
     JsonData lockStock(@ApiParam(value = "锁定商品请求参数") @RequestBody LockProductRequest lockProductRequest);
-
-    @PostMapping("/api/product/v1/lock_cart_item")
+    @PostMapping("/api/cart/v1/lock_cart_item")
     JsonData  lockCartItem(@ApiParam(value = "清空购物车商品请求参数") @RequestBody CartItemLockRequest cartItemLockRequest);
 
 }

@@ -8,5 +8,21 @@ package paas.rey;
  * @Exception
  **/
 public class SingletonObjectTest {
+    //创建一个当前类的对象
+    private static final SingletonObjectTest INSTANCE =new SingletonObjectTest();
 
+    //不会被实例化
+    private SingletonObjectTest(){
+
+    }
+
+    //获取唯一可用对象
+    public static SingletonObjectTest getInstance(){
+        return INSTANCE;
+    }
+
+    public void showMessage(){
+        System.out.println("hello world");
+    }
 }
+

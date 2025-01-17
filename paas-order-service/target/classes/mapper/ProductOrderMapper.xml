@@ -26,6 +26,6 @@
     </sql>
 
     <update id="updateOrderState">
-        update product_order set state = #{state} where out_trade_no = #{outTradeNo} and state ={oldState}
+        update product_order set state = #{state} where out_trade_no = #{outTradeNo} and state = #{oldState}
     </update>
 </mapper>

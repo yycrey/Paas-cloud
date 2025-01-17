@@ -249,6 +249,7 @@ public  JsonData confirmOrderCartItem(List<Long> productId) {
         LoginUser loginUser = LoginInterceptor.threadLocal.get();
         Map<String, Integer> cartItemMap = cartItemlockRequest.getCartItemMap();
         for(Map.Entry<String, Integer> entry : cartItemMap.entrySet()){
+
             CartitemTaskDO cartitemTaskDO = new CartitemTaskDO();
             cartitemTaskDO.setOutTradeNo(cartItemlockRequest.getOrderOutTraceNo());
             cartitemTaskDO.setCreateTime(new Date());
@@ -259,8 +260,13 @@ public  JsonData confirmOrderCartItem(List<Long> productId) {
             cartitemTaskMapper.insert(cartitemTaskDO);
             log.info("插入锁定购物车记录表");
 
+            CartItemMessage cartItemMessage = new CartItemMessage();
+            cartItemMessage.setProductId(cartitemTaskDO.getProductId());
+            cartItemMessage.setBuyNum(cartitemTaskDO.getBuyNum());
+            cartItemMessage.setIuserId(loginUser.getId());
+            cartItemMessage.setOutTradeNo(cartitemTaskDO.getOutTradeNo());
             rabbitTemplate.convertAndSend(cartItemRabbitMQConfig.getEventExchange()
-                    ,cartItemRabbitMQConfig.getCartItemReleaseDelayRoutingKey(),cartitemTaskDO);
+                    ,cartItemRabbitMQConfig.getCartItemReleaseDelayRoutingKey(),cartItemMessage);
             log.info("锁定购物车清空消息插入成功");
         }
         return JsonData.buildSuccess();
@@ -269,14 +275,13 @@ public  JsonData confirmOrderCartItem(List<Long> productId) {
     //监听购物车清空消息队列
     @Override
     public Boolean releaseCartItem(CartItemMessage cartItemMessage) {
-        LoginUser loginUser = LoginInterceptor.threadLocal.get();
         //查看商品订单是否存在
         JsonData jsonData = productOrderFeignService.queryProductOrderState(cartItemMessage.getOutTradeNo());
         if(jsonData.getCode()==0){
             if(jsonData.getData()!=null){
                 //存在，则忽略task
                 log.info("商品订单存在，task记录改成忽略");
-                cartitemTaskMapper.updateState(cartItemMessage.getProductId(),StockTaskEnum.IGNORE.name(),loginUser.getId());
+                cartitemTaskMapper.updateState(cartItemMessage.getProductId(),StockTaskEnum.IGNORE.name(),cartItemMessage.getIuserId());
                 return Boolean.TRUE;
             }else{
                 //不存在则恢复商品库存购买的数据

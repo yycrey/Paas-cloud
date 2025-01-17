@@ -1,5 +1,6 @@
 package paas.rey.mapper;
 
+import org.apache.ibatis.annotations.Param;
 import paas.rey.model.ProductOrderDO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
@@ -12,5 +13,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2025-01-06
  */
 public interface ProductOrderMapper extends BaseMapper<ProductOrderDO> {
-    int updateOrderState(long orderTradeNo,String state,String oldState);
+    int updateOrderState(@Param("state") String state,@Param("outTradeNo") String outTradeNo,@Param("oldState") String oldState);
 }

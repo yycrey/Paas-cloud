@@ -1,6 +1,8 @@
 package paas.rey.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 
 /**
@@ -29,4 +31,11 @@ public class CartItemMessage {
      */
     @JsonProperty("out_trade_no")
     private String outTradeNo;
+
+    /*
+    用户id
+     */
+    @ApiModelProperty("用户id")
+    @JsonProperty("user_id")
+    private long iuserId;
 }

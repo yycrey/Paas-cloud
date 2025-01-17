@@ -142,7 +142,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, ProductDO> im
         //锁定商品库存
         for(OrderItemRequest orderItemRequest : orderItemList){
                 //必须商品剩余库存大于购买数量则锁定库存，否则锁定失败
-               int row = productMapper.lockProduct(Long.parseLong(orderOutTraceNo),orderItemRequest.getBuyNum());
+               int row = productMapper.lockProduct(orderItemRequest.getProductId(),orderItemRequest.getBuyNum());
                if(row != 1){
                     //抛出商品库存不足异常
                     throw  new BizException(BizCodeEnum.CODE_PRODUCT_STOCK_NOT_ENOUGH);

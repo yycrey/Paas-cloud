@@ -96,7 +96,7 @@ public class CartController {
          */
         @ApiOperation("获取最新商品购物车信息")
         @PostMapping("/confirm_order_cart_item")
-        public JsonData confirmOrderCartItem(List<Long> productId){
+        public JsonData confirmOrderCartItem(@RequestBody List<Long> productId){
                 return  cartService.confirmOrderCartItem(productId);
         }
 

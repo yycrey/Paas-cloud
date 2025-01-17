@@ -2,7 +2,9 @@ package paas.rey.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
@@ -33,7 +35,7 @@ public class OrderItemVO {
 
     @ApiModelProperty("商品价格")
     @JsonProperty("product_price")
-    private BigDecimal amount;
+    private BigDecimal productPrice;
 
     @ApiModelProperty("总价格,单价*数量")
     @JsonProperty("total_amount")
@@ -43,6 +45,8 @@ public class OrderItemVO {
         商品总价获取
     */
     public BigDecimal getTotalAmount() {
-        return this.amount.multiply(new BigDecimal(this.buyNum));
+        return this.productPrice.multiply(new BigDecimal(this.buyNum));
+
     }
+
 }

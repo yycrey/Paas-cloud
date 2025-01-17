@@ -36,7 +36,7 @@ public class CartVO {
         /*
          * 获取购物车商品总数
          */
-        private Integer getTotalNums() {
+        public Integer getTotalNum() {
             if(null != cartItems){
                 return cartItems.stream().mapToInt(CartItemVO::getBuyNum).sum();
             }
@@ -46,11 +46,34 @@ public class CartVO {
         /*
          * 获取购物车商品总价
          */
-        private BigDecimal getTotalAmount() {
+        public BigDecimal getTotalAmount() {
             if(null != cartItems){
                 return cartItems.stream().map(CartItemVO::getTotalAmount)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
             }
             return BigDecimal.ZERO;
         }
+
+
+    /**
+     * 购物车里面实际支付的价格
+     * @return
+     */
+    public BigDecimal getTotalPayAmount() {
+        BigDecimal amount = new BigDecimal("0");
+        if(this.cartItems!=null){
+            for(CartItemVO cartItemVO : cartItems){
+                BigDecimal itemTotalAmount =  cartItemVO.getTotalAmount();
+                amount = amount.add(itemTotalAmount);
+            }
+        }
+        return amount;
+    }
+    public List<CartItemVO> getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(List<CartItemVO> cartItems) {
+        this.cartItems = cartItems;
+    }
 }
