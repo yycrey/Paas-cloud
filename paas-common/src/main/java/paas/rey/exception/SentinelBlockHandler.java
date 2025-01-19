@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * @Author yeyc
- * @Description 自定义限流异常
+ * @Description 自定义限流异常类
  * @Date 2025/1/18
  * @Param
  * @Exception

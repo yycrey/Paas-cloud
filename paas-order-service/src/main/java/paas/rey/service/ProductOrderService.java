@@ -25,4 +25,6 @@ public interface ProductOrderService extends IService<ProductOrderDO> {
     Boolean closeProductOrder(ProductMessage productMessage);
 
     JsonData handlerOrderCallbackMsg(ProductOrderPayTypeEnum payTypeEnum, Map<String,String> paramsMap);
+
+    JsonData queryProductOrder(int page, int size, long productId, String state);
 }

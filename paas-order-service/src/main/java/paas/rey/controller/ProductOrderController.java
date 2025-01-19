@@ -5,17 +5,16 @@ import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayTradeWapPayResponse;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import paas.rey.compontent.PayFactory;
 import paas.rey.config.AliPayConfig;
 import paas.rey.config.PayUrlConfig;
 import paas.rey.enums.ClientTypeEnum;
 import paas.rey.enums.ProductOrderPayTypeEnum;
-import paas.rey.feign.AddressFeignService;
 import paas.rey.request.ConfirmOrderRequest;
 import paas.rey.service.ProductOrderService;
 import paas.rey.utils.CommonUtil;
@@ -34,17 +33,29 @@ import java.util.UUID;
  * @since 2025-01-06
  */
 @Slf4j
+@Api(("订单模块"))
 @RestController
 @RequestMapping("/api/productOrderDO/v1/")
 public class ProductOrderController {
         @Autowired
         private ProductOrderService productOrderService;
         @Autowired
-        private AddressFeignService addressFeignService;
-        @Autowired
         private PayUrlConfig payUrlConfig;
-        @Autowired
-        private PayFactory payFactory;
+
+        /**
+         * @Description:  查询订单
+         * @Param: [page, size, productId, state]
+         * @Return: paas.rey.utils.JsonData
+         * @Author: yeyc
+         * @Date: 2025/1/17
+         */
+        @GetMapping("queryProductOrder")
+        public JsonData queryProductOrder(@ApiParam(value = "页码",required = true) @RequestParam(value = "page",required = true)int page,
+                                          @ApiParam(value = "每页数量",required = true)@RequestParam(value = "size",required = true)int size,
+                                          @ApiParam(value = "订单ID", required = true) @RequestParam(value = "product_id",required = true) long productId,
+                                          @ApiParam(value = "订单状态", required = true) @RequestParam(value = "order_state",required = true) String state){
+            return productOrderService.queryProductOrder(page,size,productId,state);
+        }
 
         @GetMapping("query_state")
         public JsonData queryProductOrderState(@RequestParam("out_trade_no")String outTradeNo){

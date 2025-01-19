@@ -3,9 +3,13 @@ package paas.rey.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +34,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import paas.rey.utils.CommonUtil;
 import paas.rey.utils.JsonData;
-import paas.rey.vo.CouponRecordVO;
-import paas.rey.vo.OrderItemVO;
-import paas.rey.vo.PayInfoVO;
-import paas.rey.vo.ProductOrderAddressVO;
+import paas.rey.vo.*;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -65,6 +67,8 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     private RabbitMQConfig rabbitMQConfig;
     @Autowired
     private PayFactory payFactory;
+    @Autowired
+    private ProductOrderItemMapper orderItemMapper;
 
     @Transactional
     @Override
@@ -399,6 +403,54 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
 
         }
         return JsonData.buildResult(BizCodeEnum.PAY_ORDER_CALLBACK_SIGN_FAIL);
+    }
+    /**
+     * @Description: 分页查询我的订单数据
+     * @Param: [page, size, productId, state]
+     * @Return: paas.rey.utils.JsonData
+     * @Author: yeyc
+     * @Date: 2025/1/17
+     */
+    @Override
+    public JsonData queryProductOrder(int page, int size, long productId, String state) {
+        LoginUser loginUser = LoginInterceptor.threadLocal.get();
+
+        Page<ProductOrderDO> pageInfo = new Page<>(page,size);
+
+        IPage<ProductOrderDO> orderDOPage = null;
+
+        if(StringUtils.isBlank(state)){
+            orderDOPage = productOrderMapper.selectPage(pageInfo,new QueryWrapper<ProductOrderDO>().eq("user_id",loginUser.getId()));
+        }else {
+            orderDOPage = productOrderMapper.selectPage(pageInfo,new QueryWrapper<ProductOrderDO>().eq("user_id",loginUser.getId()).eq("state",state));
+        }
+
+        //获取订单列表
+        List<ProductOrderDO> productOrderDOList =  orderDOPage.getRecords();
+
+        List<ProductOrderVO> productOrderVOList =  productOrderDOList.stream().map(orderDO->{
+
+            List<ProductOrderItemDO> itemDOList = orderItemMapper.selectList(new QueryWrapper<ProductOrderItemDO>().eq("product_order_id",orderDO.getId()));
+
+            List<OrderItemVO> itemVOList =  itemDOList.stream().map(item->{
+                OrderItemVO itemVO = new OrderItemVO();
+                BeanUtils.copyProperties(item,itemVO);
+                return itemVO;
+            }).collect(Collectors.toList());
+
+            ProductOrderVO productOrderVO = new ProductOrderVO();
+            BeanUtils.copyProperties(orderDO,productOrderVO);
+            productOrderVO.setOrderItemList(itemVOList);
+            return productOrderVO;
+
+        }).collect(Collectors.toList());
+
+        Map<String,Object> pageMap = new HashMap<>(3);
+        pageMap.put("total_record",orderDOPage.getTotal());
+        pageMap.put("total_page",orderDOPage.getPages());
+        pageMap.put("current_data",productOrderVOList);
+
+        return JsonData.buildSuccess(pageMap);
     }
 
     /**
